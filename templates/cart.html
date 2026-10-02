@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Shopping Bag — Closet 24{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-5 lg:px-8 py-12">
+    <p class="uppercase tracking-[.25em] text-xs text-rose">Your selection</p>
+    <h1 class="display text-5xl mt-2 mb-10">Shopping bag.</h1>
+    {% if items %}
+    <div class="grid lg:grid-cols-[1fr_340px] gap-10">
+        <div class="divide-y border-y">
+            {% for item in items %}
+            <div class="py-6 flex gap-5">
+                <div class="w-28 h-36 rounded-xl bg-cream overflow-hidden shrink-0">
+                    {% if item.product.display_image %}<img src="{{ item.product.display_image }}" class="w-full h-full object-cover">{% endif %}
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between gap-4">
+                        <div><h3 class="font-semibold">{{ item.product.name }}</h3><p class="text-xs text-gray-500 mt-1">Size: {{ item.size|default:"One size" }}</p></div>
+                        <p class="font-semibold">₹{{ item.subtotal|floatformat:0 }}</p>
+                    </div>
+                    <form method="post" action="{% url 'update_cart' item.key %}" class="mt-6 flex items-center gap-2">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}" class="w-20 border rounded-full px-4 py-2 text-sm">
+                        <button class="text-xs underline">Update</button>
+                        <a href="{% url 'remove_from_cart' item.key %}" class="text-xs text-red-500 ml-3">Remove</a>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <aside class="bg-cream rounded-3xl p-7 h-fit">
+            <h2 class="display text-2xl">Summary</h2>
+            <div class="flex justify-between mt-6 text-sm"><span>Subtotal</span><b>₹{{ total|floatformat:0 }}</b></div>
+            <div class="flex justify-between mt-3 text-sm text-gray-500"><span>Shipping</span><span>Calculated at checkout</span></div>
+            <div class="border-t mt-6 pt-5 flex justify-between"><span class="font-semibold">Total</span><b class="text-xl">₹{{ total|floatformat:0 }}</b></div>
+            <a href="{% url 'checkout' %}" class="block text-center bg-ink text-white rounded-full py-3.5 mt-6 font-semibold">Checkout →</a>
+        </aside>
+    </div>
+    {% else %}
+    <div class="py-24 text-center border-y">
+        <p class="display text-4xl">Your bag is empty.</p>
+        <a href="{% url 'shop' %}" class="inline-block mt-6 bg-ink text-white rounded-full px-7 py-3.5">Continue shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

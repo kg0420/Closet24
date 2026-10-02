@@ -1,0 +1,56 @@
+{% extends "owner/base.html" %}
+{% block title %}Store & Payment Settings — FOLLOW ME{% endblock %}
+{% block owner_content %}
+<div class="max-w-2xl">
+  <p class="uppercase tracking-widest text-xs text-rose font-semibold">Store Configuration</p>
+  <h1 class="display text-4xl mt-2">Store & Payment Settings</h1>
+  <p class="text-gray-500 mt-2">Configure boutique brand details and direct UPI / Google Pay credentials.</p>
+
+  <form method="post" class="bg-white border border-black/5 rounded-3xl p-7 mt-6 space-y-5 shadow-sm">
+    {% csrf_token %}
+    <div>
+      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Store / Boutique Name</label>
+      <input name="shop_name" value="{{ settings_obj.shop_name }}" placeholder="e.g. FOLLOW ME Boutique">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Business Phone / WhatsApp</label>
+      <input name="phone" value="{{ settings_obj.phone }}" placeholder="+91 98765 43210">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">UPI ID (VPA)</label>
+      <input name="upi_id" value="{{ settings_obj.upi_id }}" placeholder="e.g. yourbusiness@okhdfcbank">
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">UPI Payee / Account Name</label>
+      <input name="upi_name" value="{{ settings_obj.upi_name }}" placeholder="e.g. FOLLOW ME BOUTIQUE">
+    </div>
+
+    <button type="submit" class="bg-ink text-white rounded-full px-7 py-3.5 text-sm font-medium hover:bg-black/80 transition">Save Settings</button>
+  </form>
+
+  <div class="bg-cream rounded-3xl p-6 mt-6 text-sm leading-relaxed border border-black/5">
+    <b class="text-ink">Direct UPI / Google Pay Workflow</b>
+    <ol class="list-decimal list-inside space-y-1 text-gray-600 mt-2">
+      <li>Customer builds a cart and enters shipping details at checkout.</li>
+      <li>At the payment screen, a dynamic QR code and Google Pay deep-links are presented.</li>
+      <li>Customer transfers funds to your UPI ID and enters their 12-digit UTR transaction ID.</li>
+      <li>You inspect the UTR in your banking or UPI app and advance order status to Confirmed.</li>
+    </ol>
+  </div>
+</div>
+
+<style>
+  input {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+    padding: .85rem 1rem;
+    font-size: .875rem;
+    transition: border-color .15s;
+  }
+  input:focus {
+    outline: none;
+    border-color: #111;
+  }
+</style>
+{% endblock %}

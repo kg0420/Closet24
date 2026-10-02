@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} Confirmation — Closet 24{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-5 py-20 text-center">
+    <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-3xl border border-emerald-100 shadow-sm">
+      ✓
+    </div>
+    
+    <p class="uppercase tracking-[.25em] text-xs text-rose font-bold mt-6">Order Received</p>
+    <h1 class="display text-4xl lg:text-5xl mt-2">Order #{{ order.id }} Confirmed.</h1>
+    
+    <!-- Payment & Invoice Status Card -->
+    <div class="bg-cream/60 border border-black/5 rounded-3xl p-6 mt-8 text-left space-y-4">
+        <div class="flex justify-between items-center border-b border-black/5 pb-3">
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Payment Status</p>
+                <div class="flex items-center gap-2 mt-1">
+                    {% if order.payment_status == 'Paid' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        ✓ Payment Completed & Verified
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                        ⏳ {{ order.payment_status }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Amount</p>
+                <p class="font-bold text-lg text-ink">₹{{ order.total|floatformat:0 }}</p>
+            </div>
+        </div>
+
+        {% if order.payment_reference %}
+        <div class="text-xs text-gray-600">
+            <b>UPI Reference / UTR:</b> <span class="font-mono bg-white px-2 py-0.5 rounded border border-black/5">{{ order.payment_reference }}</span>
+        </div>
+        {% endif %}
+
+        {% if order.payment_status == 'Paid' %}
+        <div class="pt-2">
+            <p class="text-xs text-gray-600 mb-3">Your payment has been successfully completed and confirmed. You can now download your official tax invoice containing full customer and payment details.</p>
+            <a href="{% url 'download_receipt' order.id %}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl py-3.5 text-sm font-semibold transition shadow-sm">
+                <span>📄</span> Download / Print Official Tax Invoice
+            </a>
+        </div>
+        {% else %}
+        <div class="pt-2">
+            <div class="p-4 bg-white rounded-2xl border border-black/5 text-xs text-gray-600 space-y-1">
+                <p class="font-semibold text-gray-800">🔒 Invoice Locked Until Verification</p>
+                <p>According to boutique store policy, tax invoices are generated only after payment is verified and completed. Your invoice will be unlocked under <a href="{% url 'my_orders' %}" class="text-rose underline font-semibold">My Orders</a> as soon as the merchant verifies the payment reference.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-3 mt-8">
+        <a href="{% url 'my_orders' %}" class="bg-ink text-white rounded-full px-7 py-3.5 text-sm font-medium hover:bg-black/80 transition">View My Orders</a>
+        <a href="{% url 'shop' %}" class="border border-black/10 rounded-full px-7 py-3.5 text-sm font-medium hover:bg-cream transition">Continue Shopping</a>
+    </div>
+</div>
+{% endblock %}

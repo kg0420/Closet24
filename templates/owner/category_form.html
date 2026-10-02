@@ -1,0 +1,45 @@
+{% extends "owner/base.html" %}
+{% block title %}{{ heading }} — FOLLOW ME{% endblock %}
+{% block owner_content %}
+<div class="max-w-2xl">
+  <a href="{% url 'owner_categories' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-ink font-medium">← Back to Categories</a>
+  <h1 class="display text-4xl mt-4">{{ heading }}</h1>
+  <p class="text-gray-500 mt-2">Categories group items in the main store navigation and filter pages.</p>
+
+  <form method="post" class="bg-white border border-black/5 rounded-3xl p-7 mt-6 space-y-5 shadow-sm">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+      <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+      {% endif %}
+      {% if field.errors %}
+      <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="flex items-center gap-4 pt-3">
+      <button type="submit" class="bg-ink text-white rounded-full px-7 py-3 text-sm font-medium hover:bg-black/80 transition">{{ button }}</button>
+      <a href="{% url 'owner_categories' %}" class="text-xs text-gray-500 hover:underline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  input, textarea, select {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+    padding: .85rem 1rem;
+    font-size: .875rem;
+    transition: border-color .15s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #111;
+  }
+</style>
+{% endblock %}

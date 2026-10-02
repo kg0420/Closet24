@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Closet 24 — Everyday Style, Elevated{% endblock %}
+{% block content %}
+
+<section class="relative overflow-hidden bg-cream grain">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-14 lg:py-20 grid lg:grid-cols-2 gap-12 items-center min-h-[680px]">
+        <div class="max-w-xl">
+            <p class="uppercase tracking-[.35em] text-xs font-semibold text-rose mb-6">New season · 2026</p>
+            <h1 class="display text-6xl sm:text-7xl lg:text-8xl leading-[.9] tracking-tight">Dress<br><span class="italic">your</span><br>moment.</h1>
+            <p class="mt-7 text-gray-600 leading-7 max-w-md">Casual silhouettes, easy layers and statement pieces curated for the way you actually live.</p>
+            <div class="mt-9 flex flex-wrap gap-3">
+                <a href="{% url 'shop' %}" class="bg-ink text-white rounded-full px-7 py-3.5 text-sm font-semibold hover:-translate-y-0.5 transition">Shop the collection →</a>
+                <a href="#about" class="border border-black/15 rounded-full px-7 py-3.5 text-sm font-semibold hover:bg-white transition">Our story</a>
+            </div>
+            <div class="mt-12 flex gap-10 text-xs uppercase tracking-[.18em] text-gray-500">
+                <span>Curated fits</span><span>Easy returns</span><span>Local love</span>
+            </div>
+        </div>
+        <div class="relative">
+            <div class="aspect-[4/5] rounded-[2rem] overflow-hidden bg-sand">
+                <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85" class="w-full h-full object-cover" alt="Fashion collection">
+            </div>
+            <div class="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl p-5 max-w-[220px]">
+                <p class="text-xs uppercase tracking-widest text-gray-400">Editor's pick</p>
+                <p class="display text-xl mt-1">Effortless. Everyday.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
+    <div class="flex items-end justify-between mb-8">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs text-rose">Shop the edit</p>
+            <h2 class="display text-4xl mt-2">Featured pieces</h2>
+        </div>
+        <a href="{% url 'shop' %}" class="text-sm underline underline-offset-4">View all</a>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
+        {% for product in featured %}
+            {% include "partials/product_card.html" with product=product %}
+        {% empty %}
+            {% for i in "1234" %}
+            <div class="aspect-[3/4] bg-cream rounded-2xl"></div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="bg-ink text-white">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs text-white/40">The Closet 24 edit</p>
+            <h2 class="display text-5xl mt-3 leading-tight">Style that doesn't<br><span class="italic text-rose">try too hard.</span></h2>
+        </div>
+        <p class="text-white/60 leading-8 max-w-lg">We believe the best wardrobe is the one you reach for every day. Our collection brings together comfortable fabrics, wearable colours and silhouettes that move with you.</p>
+    </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
+    <div class="flex items-end justify-between mb-8">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs text-rose">Fresh arrivals</p>
+            <h2 class="display text-4xl mt-2">Just dropped</h2>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
+        {% for product in new_arrivals %}
+            {% include "partials/product_card.html" with product=product %}
+        {% empty %}
+            <p class="text-gray-500 col-span-full">Add products from the owner dashboard / Django admin.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="about" class="bg-cream">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-20 grid lg:grid-cols-2 gap-14 items-center">
+        <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=85" class="rounded-[2rem] w-full aspect-[4/3] object-cover" alt="Boutique clothing">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs text-rose">About us</p>
+            <h2 class="display text-5xl mt-3 leading-tight">Made for your<br><span class="italic">everyday.</span></h2>
+            <p class="text-gray-600 leading-8 mt-6">Closet 24 is a casual fashion boutique concept built around personal style — not rules. From coffee runs to celebrations, find pieces you can mix, match and make your own.</p>
+            <a href="{% url 'shop' %}" class="inline-block mt-7 border-b border-ink pb-1 text-sm font-semibold">Explore the collection →</a>
+        </div>
+    </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
+    <div class="grid md:grid-cols-3 gap-4">
+        <div class="rounded-3xl bg-white border border-black/5 p-8">
+            <div class="text-2xl">✦</div><h3 class="display text-2xl mt-6">Curated</h3><p class="text-gray-500 text-sm leading-6 mt-2">Small, intentional edits instead of endless scrolling.</p>
+        </div>
+        <div class="rounded-3xl bg-white border border-black/5 p-8">
+            <div class="text-2xl">♡</div><h3 class="display text-2xl mt-6">Personal</h3><p class="text-gray-500 text-sm leading-6 mt-2">A boutique experience with real human attention.</p>
+        </div>
+        <div class="rounded-3xl bg-white border border-black/5 p-8">
+            <div class="text-2xl">↗</div><h3 class="display text-2xl mt-6">Easy</h3><p class="text-gray-500 text-sm leading-6 mt-2">Browse, add to bag and send your order without the friction.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

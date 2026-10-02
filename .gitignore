@@ -1,0 +1,28 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Django staticfiles collected
+staticfiles/
+
+# SQLite database (optional to un-comment if deploying clean)
+*.sqlite3-journal
+
+# Environment variables
+.env
+.env.*
+
+# IDEs & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

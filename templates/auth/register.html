@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Create Account — Closet 24{% endblock %}
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-5 py-16 bg-cream">
+    <div class="w-full max-w-md bg-white rounded-[2rem] p-8 sm:p-10">
+        <p class="uppercase tracking-[.25em] text-xs text-rose">Join Closet 24</p>
+        <h1 class="display text-4xl mt-2">Create account.</h1>
+        <form method="post" class="mt-8 space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="text-xs uppercase tracking-widest text-gray-500">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p class="text-xs text-red-500">{{ field.errors|striptags }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <style>input{width:100%;margin-top:.5rem;border:1px solid #e5e5e5;border-radius:14px;padding:.85rem 1rem;outline:none}</style>
+            <button class="w-full bg-ink text-white rounded-full py-3.5 font-semibold mt-2">Create account</button>
+        </form>
+        <p class="text-sm text-gray-500 mt-6">Already have an account? <a class="underline" href="{% url 'login' %}">Sign in</a></p>
+    </div>
+</div>
+{% endblock %}

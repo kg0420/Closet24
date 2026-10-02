@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Closet 24{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-5 lg:px-8 py-12">
+    <p class="uppercase tracking-[.25em] text-xs text-rose">Almost there</p>
+    <h1 class="display text-5xl mt-2 mb-10">Checkout.</h1>
+    <form method="post" class="grid lg:grid-cols-[1fr_380px] gap-10">
+        {% csrf_token %}
+        <div class="border rounded-3xl p-7">
+            <h2 class="display text-2xl mb-6">Delivery details</h2>
+            <div class="grid sm:grid-cols-2 gap-5">
+                {% for field in form %}
+                <div class="{% if field.name == 'address' %}sm:col-span-2{% endif %}">
+                    <label class="text-xs uppercase tracking-widest text-gray-500">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p class="text-xs text-red-500 mt-1">{{ field.errors|striptags }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <style>
+                input, textarea, select { width:100%; margin-top:.5rem; border:1px solid #e5e5e5; border-radius:14px; padding:.85rem 1rem; outline:none; }
+                input:focus, textarea:focus { border-color:#181616; }
+            </style>
+            <button class="mt-8 w-full bg-ink text-white rounded-full py-4 font-semibold">Place order →</button>
+            <p class="text-xs text-gray-400 text-center mt-3">Demo checkout. Connect Razorpay/Stripe for production payments.</p>
+        </div>
+         <aside class="bg-cream rounded-3xl p-7 h-fit">
+            <h2 class="display text-2xl mb-4">Your order</h2>
+            <div class="divide-y divide-black/10">
+                {% for key, product, item, item_sub, item_tax in items %}
+                <div class="py-3 text-sm">
+                    <div class="flex justify-between font-medium">
+                        <span>{{ product.name }} × {{ item.quantity }}</span>
+                        <span>₹{{ item_sub|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>GST ({{ product.gst_rate }}%)</span>
+                        <span>+₹{{ item_tax|floatformat:2 }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="border-t border-black/15 pt-4 mt-3 space-y-2 text-sm">
+                <div class="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>Applicable GST</span>
+                    <span>₹{{ total_tax|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t font-bold text-lg text-ink">
+                    <span>Total Payable</span>
+                    <span>₹{{ total|floatformat:2 }}</span>
+                </div>
+            </div>
+        </aside>
+    </form>
+</div>
+{% endblock %}

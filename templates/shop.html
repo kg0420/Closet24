@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Shop — Closet 24{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-5 lg:px-8 py-12">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs text-rose">The collection</p>
+            <h1 class="display text-5xl mt-2">Shop everything.</h1>
+        </div>
+        <form class="flex gap-2" method="get">
+            <input name="q" value="{{ query }}" placeholder="Search styles..." class="w-56 border border-black/10 rounded-full px-5 py-3 text-sm outline-none focus:border-ink">
+            <select name="sort" onchange="this.form.submit()" class="border border-black/10 rounded-full px-4 py-3 text-sm bg-white">
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low</option>
+                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="flex gap-2 overflow-x-auto pb-3 mb-8">
+        <a href="{% url 'shop' %}" class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-semibold {% if not active_category %}bg-ink text-white{% else %}bg-cream{% endif %}">All</a>
+        {% for category in categories %}
+            <a href="?category={{ category.slug }}" class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-semibold {% if active_category == category.slug %}bg-ink text-white{% else %}bg-cream{% endif %}">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
+        {% for product in products %}
+            {% include "partials/product_card.html" with product=product %}
+        {% empty %}
+            <div class="col-span-full py-24 text-center">
+                <p class="display text-3xl">No pieces found.</p>
+                <p class="text-gray-500 mt-2">Try another search or category.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

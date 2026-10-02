@@ -1,0 +1,107 @@
+{% extends "owner/base.html" %}
+{% block title %}Order #{{ order.id }} — Closet 24{% endblock %}
+{% block owner_content %}
+<a href="{% url 'owner_orders' %}" class="underline text-sm">← Back to Orders</a>
+
+<div class="grid lg:grid-cols-2 gap-6 mt-5">
+    <div class="bg-white border rounded-3xl p-7">
+        <p class="text-xs uppercase tracking-widest text-gray-400">Order Details</p>
+        <h1 class="display text-4xl mt-2">#{{ order.id }}</h1>
+
+        <!-- Customer & Delivery Info -->
+        <div class="bg-cream rounded-2xl p-5 mt-6 text-sm leading-7">
+            <div class="flex justify-between items-center mb-2">
+                <b class="text-base">{{ order.full_name }}</b>
+                {% if order.fulfillment_type == 'pickup' %}
+                    <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">🏬 Store Pickup</span>
+                {% else %}
+                    <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">🚚 Home Delivery</span>
+                {% endif %}
+            </div>
+            <b>Phone:</b> {{ order.phone }}<br>
+            {% if order.fulfillment_type == 'pickup' %}
+                <p class="text-gray-600 mt-1 italic">Customer will pick up items in store.</p>
+            {% else %}
+                <b>Delivery Address:</b><br>
+                {{ order.address }}<br>
+                {{ order.city }}, {{ order.state }} - {{ order.pincode }}
+            {% endif %}
+        </div>
+        
+        <!-- Order Items -->
+        <h2 class="display text-2xl mt-7 mb-3">Items</h2>
+        <div class="divide-y">
+            {% for item in order.items.all %}
+            <div class="py-3 flex justify-between text-sm">
+                <span>{{ item.product.name }} {% if item.size %}({{ item.size }}){% endif %} × {{ item.quantity }}</span>
+                <b>₹{{ item.subtotal|floatformat:2 }}</b>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- GST & Financial Breakdown -->
+        <div class="mt-6 p-4 bg-cream rounded-2xl text-sm space-y-1">
+            <p><b>Subtotal:</b> ₹{{ order.subtotal|floatformat:2 }}</p>
+            {% if order.cgst > 0 %}
+                <p><b>CGST:</b> ₹{{ order.cgst|floatformat:2 }} | <b>SGST:</b> ₹{{ order.sgst|floatformat:2 }}</p>
+            {% else %}
+                <p><b>IGST:</b> ₹{{ order.igst|floatformat:2 }}</p>
+            {% endif %}
+            <p class="font-bold text-base pt-1 border-t border-black/10">Total: ₹{{ order.total|floatformat:2 }}</p>
+            <p class="text-xs text-gray-500 pt-1"><b>UTR / Payment Ref:</b> {{ order.payment_reference|default:"Not submitted yet" }}</p>
+        </div>
+    </div>
+
+    <!-- Status Update Panel -->
+    <div class="bg-white border rounded-3xl p-7 h-fit">
+        <h2 class="display text-2xl">Update Order</h2>
+        <p class="text-sm text-gray-500 mt-1">Payment Status: <b class="text-ink">{{ order.payment_status }}</b></p>
+
+        <form method="post" class="mt-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="text-xs uppercase tracking-widest text-gray-500">Order Fulfillment Status</label>
+                <select name="status" class="w-full border rounded-xl p-3 mt-1 text-sm bg-white">
+                    {% for code, label in order.STATUS_CHOICES %}
+                    <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs uppercase tracking-widest text-gray-500">Payment Status</label>
+                <select name="payment_status" class="w-full border rounded-xl p-3 mt-1 text-sm bg-white">
+                    <option value="Pending" {% if order.payment_status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Submitted / Under Verification" {% if order.payment_status == "Submitted / Under Verification" %}selected{% endif%}>Submitted / Under Verification</option>
+                    <option value="Paid" {% if order.payment_status == "Paid" %}selected{% endif %}>Paid</option>
+                    <option value="Failed" {% if order.payment_status == "Failed" %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-ink text-white rounded-full py-3.5 font-medium hover:bg-black transition">Save Changes</button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t space-y-3">
+            {% if order.payment_status == "Paid" %}
+            <a href="{% url 'download_receipt' order.id %}" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-3 rounded-full font-semibold transition shadow-sm">
+                📄 View / Print Official Tax Invoice
+            </a>
+            {% else %}
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 space-y-2">
+                <p><b>🔒 Invoice Locked:</b> Payment is currently <b>{{ order.payment_status }}</b>. Invoices are generated only after payment is verified and saved as <b>Paid</b> above.</p>
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'owner_order_delete' order.id %}" onsubmit="return confirm('Are you sure you want to delete Order #{{ order.id }}? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-center text-red-600 hover:text-red-800 text-xs py-2 hover:underline font-medium">
+                    🗑️ Delete This Order
+                </button>
+            </form>
+            <div class="text-xs text-gray-500 text-center">
+                <b>Google Pay / UPI:</b> Verify the payment with UTR reference before dispatching.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

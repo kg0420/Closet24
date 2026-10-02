@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Closet 24{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-5 lg:px-8 py-10">
+    <div class="grid lg:grid-cols-2 gap-12">
+        <!-- Product Image Gallery -->
+        <div class="space-y-4">
+            <!-- Main Featured Image Container -->
+            <div class="relative aspect-[4/5] bg-cream rounded-[2rem] overflow-hidden group shadow-sm">
+                {% if product.all_images %}
+                    <img id="mainProductImage" src="{{ product.all_images.0 }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-300">
+                    
+                    {% if product.all_images|length > 1 %}
+                    <!-- Prev / Next Controls -->
+                    <button type="button" onclick="changeImage(-1)" aria-label="Previous photo" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-ink shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                        ❮
+                    </button>
+                    <button type="button" onclick="changeImage(1)" aria-label="Next photo" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-ink shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                        ❯
+                    </button>
+                    
+                    <!-- Counter Badge -->
+                    <span id="imageCounter" class="absolute bottom-4 right-4 bg-black/60 backdrop-blur text-white text-[11px] font-semibold px-3 py-1 rounded-full pointer-events-none">
+                        1 / {{ product.all_images|length }}
+                    </span>
+                    {% endif %}
+                {% else %}
+                    <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                        <span class="text-4xl mb-2">👗</span>
+                        <p class="text-sm">No photo available</p>
+                    </div>
+                {% endif %}
+
+                {% if product.is_new %}
+                <span class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">New</span>
+                {% endif %}
+                {% if product.discount_percent %}
+                <span class="absolute top-4 right-4 bg-rose text-white px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">-{{ product.discount_percent }}%</span>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail Carousel / Strip -->
+            {% if product.all_images|length > 1 %}
+            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                {% for img_url in product.all_images %}
+                <button type="button" onclick="selectImage({{ forloop.counter0 }}, '{{ img_url|escapejs }}')" 
+                    class="thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 {% if forloop.first %}border-rose ring-2 ring-rose/20 opacity-100{% else %}border-transparent hover:border-black/20 opacity-70 hover:opacity-100{% endif %}">
+                    <img src="{{ img_url }}" alt="{{ product.name }} thumbnail {{ forloop.counter }}" class="w-full h-full object-cover">
+                </button>
+                {% endfor %}
+            </div>
+
+            <script>
+                const productImages = {{ product.all_images|safe }};
+                let currentImageIndex = 0;
+
+                function selectImage(index, url) {
+                    currentImageIndex = index;
+                    const mainImg = document.getElementById('mainProductImage');
+                    if (mainImg) {
+                        mainImg.style.opacity = '0.4';
+                        mainImg.src = url;
+                        setTimeout(() => { mainImg.style.opacity = '1'; }, 120);
+                    }
+                    const counter = document.getElementById('imageCounter');
+                    if (counter) {
+                        counter.textContent = `${index + 1} / ${productImages.length}`;
+                    }
+                    const thumbs = document.querySelectorAll('.thumb-btn');
+                    thumbs.forEach((t, i) => {
+                        if (i === index) {
+                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-rose ring-2 ring-rose/20 opacity-100';
+                        } else {
+                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-transparent hover:border-black/20 opacity-70 hover:opacity-100';
+                        }
+                    });
+                }
+
+                function changeImage(direction) {
+                    if (!productImages || productImages.length <= 1) return;
+                    currentImageIndex = (currentImageIndex + direction + productImages.length) % productImages.length;
+                    selectImage(currentImageIndex, productImages[currentImageIndex]);
+                }
+            </script>
+            {% endif %}
+        </div>
+        <div class="lg:py-8">
+            <p class="uppercase tracking-[.25em] text-xs text-rose">{{ product.category.name|default:"FOLLOW ME" }}</p>
+            <h1 class="display text-5xl mt-3">{{ product.name }}</h1>
+            <div class="mt-5 flex items-center gap-3">
+                <span class="text-2xl font-semibold">₹{{ product.price|floatformat:0 }}</span>
+                {% if product.compare_at_price %}<span class="text-gray-400 line-through">₹{{ product.compare_at_price|floatformat:0 }}</span>{% endif %}
+            </div>
+            <p class="text-gray-600 leading-7 mt-7">{{ product.description }}</p>
+
+            <form action="{% url 'add_to_cart' product.id %}" method="post" class="mt-8">
+                {% csrf_token %}
+                {% if product.sizes %}
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm mb-3"><span class="font-semibold">Available sizes</span><span class="text-gray-400">Choose in store / DM</span></div>
+                    <p class="text-sm text-gray-600 bg-cream rounded-xl px-4 py-3">{{ product.sizes }}</p>
+                    <input type="hidden" name="size" value="{{ product.sizes }}">
+                </div>
+                {% endif %}
+                <div class="flex gap-3">
+                    <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" class="w-24 border border-black/10 rounded-full px-5 py-3.5">
+                    <input type="hidden" name="next" value="cart">
+                    <button class="flex-1 bg-ink text-white rounded-full py-3.5 font-semibold hover:bg-rose transition">Add to bag</button>
+                </div>
+            </form>
+
+            <div class="border-t mt-10 pt-8 grid sm:grid-cols-3 gap-5 text-xs">
+                <div><b>Quality</b><p class="text-gray-500 mt-1">Curated pieces</p></div>
+                <div><b>Pickup</b><p class="text-gray-500 mt-1">Local store pickup</p></div>
+                <div><b>Support</b><p class="text-gray-500 mt-1">DM for styling help</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-5 lg:px-8 py-16">
+    <h2 class="display text-3xl mb-8">You may also like</h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for p in related %}{% include "partials/product_card.html" with product=p %}{% endfor %}
+    </div>
+</div>
+{% endblock %}
