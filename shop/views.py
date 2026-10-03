@@ -271,21 +271,24 @@ def payment_page(request, order_id):
     amount = f"{order.total:.2f}"
     note = f"Order #{order.id} Boutique"
 
-    # Construct standard UPI Intent URI (Supported by Google Pay,PhonePe, Paytm, BHIM)
+    # Construct standard UPI Intent URI
     upi_params = {
         "pa": upi_id,
         "pn": upi_name,
         "am": amount,
         "cu": "INR",
-        "tn": note,
+        "tn": f"Order {order.id}",
     }
-    upi_url = f"upi://pay?{urllib.parse.urlencode(upi_params)}"
+    encoded_params = urllib.parse.urlencode(upi_params)
+    upi_url = f"upi://pay?{encoded_params}"
 
-    # Specific Google Pay deep-link
-    gpay_url = f"gpay://upi/pay?{urllib.parse.urlencode(upi_params)}"
+    # Dedicated deep-links for major UPI apps
+    gpay_url = f"gpay://upi/pay?{encoded_params}"
+    phonepe_url = f"phonepe://pay?{encoded_params}"
+    paytm_url = f"paytmmp://pay?{encoded_params}"
 
-    # Generate QR Code URL via Google Charts API or QuickChart (zeroextra pip dependency required)
-    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={urllib.parse.quote(upi_url)}"
+    # High-resolution QR code
+    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(upi_url)}"
 
     if request.method == "POST":
         utr = request.POST.get("payment_reference", "").strip()
@@ -302,6 +305,8 @@ def payment_page(request, order_id):
         "order": order,
         "upi_url": upi_url,
         "gpay_url": gpay_url,
+        "phonepe_url": phonepe_url,
+        "paytm_url": paytm_url,
         "qr_code_url": qr_code_url,
         "upi_id": upi_id,
         "upi_name": upi_name,

@@ -1,8 +1,27 @@
 import os
 from pathlib import Path
-import dj_database_url
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file if present
+_env_file = BASE_DIR / ".env"
+if _env_file.exists():
+    try:
+        with open(_env_file, encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line and not _line.startswith("#") and "=" in _line:
+                    _k, _v = _line.split("=", 1)
+                    _k, _v = _k.strip(), _v.strip()
+                    if (_v.startswith('"') and _v.endswith('"')) or (_v.startswith("'") and _v.endswith("'")):
+                        _v = _v[1:-1]
+                    os.environ.setdefault(_k, _v)
+    except Exception:
+        pass
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-secret-key-before-production")
 
@@ -76,7 +95,7 @@ DATABASES = {
 
 # Automatically use PostgreSQL on Render if DATABASE_URL environment variable is provided
 DATABASE_URL = os.environ.get("DATABASE_URL")
-if DATABASE_URL:
+if DATABASE_URL and dj_database_url:
     DATABASES["default"] = dj_database_url.config(
         default=DATABASE_URL,
         conn_max_age=600,
