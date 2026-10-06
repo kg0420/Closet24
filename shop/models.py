@@ -36,13 +36,13 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name) or "category"
+            base_slug = (slugify(self.name) or "category")[:40]
             slug = base_slug
             counter = 1
             while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
+                slug = f"{base_slug[:35]}-{counter}"
                 counter += 1
-            self.slug = slug
+            self.slug = slug[:50]
         super().save(*args, **kwargs)
 
 
@@ -78,14 +78,23 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name) or "item"
+            base_slug = (slugify(self.name) or "item")[:40]
             slug = base_slug
             counter = 1
             while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
+                slug = f"{base_slug[:35]}-{counter}"
                 counter += 1
-            self.slug = slug
+            self.slug = slug[:50]
         super().save(*args, **kwargs)
+
+    @property
+    def safe_image_url(self):
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
 
     @property
     def discount_percent(self):
@@ -219,3 +228,15 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="gallery_images")
     image = models.ImageField(upload_to="products/gallery/")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def display_url(self):
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
+
+    def __str__(self):
+        return f"Image for {self.product.name}"

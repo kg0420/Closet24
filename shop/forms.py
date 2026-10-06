@@ -53,4 +53,19 @@ class ProductForm(forms.ModelForm):
             "featured",
             "is_new",
         )
-        widgets = {"description": forms.Textarea(attrs={"rows": 4})}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "image": forms.FileInput(attrs={
+                "class": "w-full border border-white/15 rounded-2xl p-3 text-xs bg-[#161c2d] text-slate-300 focus:outline-none focus:border-red-500",
+                "accept": "image/*",
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "gst_rate" in self.fields:
+            self.fields["gst_rate"].required = False
+        if "image" in self.fields:
+            self.fields["image"].required = False
+        if "image_url" in self.fields:
+            self.fields["image_url"].required = False

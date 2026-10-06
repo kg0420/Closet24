@@ -412,16 +412,34 @@ def owner_products(request):
 @owner_required
 def owner_product_new(request):
     if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save()
-            for f in request.FILES.getlist("gallery_images"):
-                ProductImage.objects.create(product=product, image=f)
-            messages.success(request, f"Product '{product.name}' added successfully.")
-            return redirect("owner_products")
-        else:
-            err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
-            messages.error(request, f"Could not add product. Please check: {'; '.join(err_list)}")
+        try:
+            form = ProductForm(request.POST, request.FILES)
+            if form.is_valid():
+                product = form.save(commit=False)
+                base_slug = (slugify(product.name) or "item")[:40]
+                slug = base_slug
+                counter = 1
+                while Product.objects.filter(slug=slug).exists():
+                    slug = f"{base_slug[:35]}-{counter}"
+                    counter += 1
+                product.slug = slug[:50]
+                product.save()
+
+                for f in request.FILES.getlist("gallery_images"):
+                    try:
+                        ProductImage.objects.create(product=product, image=f)
+                    except Exception as img_err:
+                        messages.warning(request, f"Could not save a gallery image: {img_err}")
+
+                messages.success(request, f"Product '{product.name}' added successfully.")
+                return redirect("owner_products")
+            else:
+                err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
+                messages.error(request, f"Could not add product. Please check: {'; '.join(err_list)}")
+        except Exception as e:
+            import logging
+            logging.exception("Error adding product")
+            messages.error(request, f"Error saving product: {str(e)}")
     else:
         form = ProductForm()
     return render(request, "owner/product_form.html", {
@@ -435,35 +453,48 @@ def owner_product_new(request):
 def owner_product_edit(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == "POST":
-        if request.POST.get("clear_main_image") == "1" and product.image:
-            product.image.delete(save=False)
-            product.image = None
-            product.save(update_fields=["image"])
+        try:
+            if request.POST.get("clear_main_image") == "1":
+                try:
+                    if product.image:
+                        product.image.delete(save=False)
+                except Exception:
+                    pass
+                product.image = None
+                product.save(update_fields=["image"])
 
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            product = form.save()
+            form = ProductForm(request.POST, request.FILES, instance=product)
+            if form.is_valid():
+                product = form.save(commit=False)
 
-            # Synchronize slug if product name was modified
-            base_slug = slugify(product.name) or "item"
-            if not product.slug or not product.slug.startswith(base_slug):
-                slug = base_slug
-                counter = 1
-                while Product.objects.filter(slug=slug).exclude(pk=product.pk).exists():
-                    slug = f"{base_slug}-{counter}"
-                    counter += 1
-                product.slug = slug
-                product.save(update_fields=["slug"])
+                # Synchronize slug safely without exceeding 50 chars
+                base_slug = (slugify(product.name) or "item")[:40]
+                if not product.slug or not product.slug.startswith(base_slug):
+                    slug = base_slug
+                    counter = 1
+                    while Product.objects.filter(slug=slug).exclude(pk=product.pk).exists():
+                        slug = f"{base_slug[:35]}-{counter}"
+                        counter += 1
+                    product.slug = slug[:50]
 
-            # Handle additional gallery photo uploads
-            for f in request.FILES.getlist("gallery_images"):
-                ProductImage.objects.create(product=product, image=f)
+                product.save()
 
-            messages.success(request, f"Product '{product.name}' updated successfully.")
-            return redirect("owner_products")
-        else:
-            err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
-            messages.error(request, f"Could not update product. Please check: {'; '.join(err_list)}")
+                # Handle additional gallery photo uploads safely
+                for f in request.FILES.getlist("gallery_images"):
+                    try:
+                        ProductImage.objects.create(product=product, image=f)
+                    except Exception as img_err:
+                        messages.warning(request, f"Could not save a gallery image: {img_err}")
+
+                messages.success(request, f"Product '{product.name}' updated successfully.")
+                return redirect("owner_products")
+            else:
+                err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
+                messages.error(request, f"Could not update product. Please check: {'; '.join(err_list)}")
+        except Exception as e:
+            import logging
+            logging.exception("Error updating product %s", product_id)
+            messages.error(request, f"Error updating product: {str(e)}")
     else:
         form = ProductForm(instance=product)
 
@@ -480,6 +511,11 @@ def owner_product_delete_gallery_image(request, image_id):
     img = get_object_or_404(ProductImage, id=image_id)
     product_id = img.product_id
     if request.method == "POST":
+        try:
+            if img.image:
+                img.image.delete(save=False)
+        except Exception:
+            pass
         img.delete()
         messages.success(request, "Photo removed from gallery.")
     return redirect("owner_product_edit", product_id=product_id)

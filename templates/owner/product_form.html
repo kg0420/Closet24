@@ -84,15 +84,22 @@
         {{ form.image }}
         {% if form.image.errors %}<p class="text-red-400 text-xs mt-1">{{ form.image.errors|striptags }}</p>{% endif %}
         
-        {% if product and product.image %}
+        {% if product and product.safe_image_url %}
         <div class="mt-3 flex items-center gap-3 p-3 bg-[#161c2d] rounded-2xl border border-white/10">
-          <img src="{{ product.image.url }}" class="w-12 h-14 object-cover rounded-lg border border-white/10 shrink-0" alt="Current image">
+          <img src="{{ product.safe_image_url }}" class="w-12 h-14 object-cover rounded-lg border border-white/10 shrink-0" alt="Current image">
           <div class="text-xs">
             <p class="text-slate-300 font-medium">Currently uploaded photo</p>
             <label class="flex items-center gap-1.5 text-red-400 hover:text-red-300 cursor-pointer mt-1 font-semibold">
               <input type="checkbox" name="clear_main_image" value="1" class="rounded">
               Remove this uploaded photo
             </label>
+          </div>
+        </div>
+        {% elif product and product.image_url %}
+        <div class="mt-3 flex items-center gap-3 p-3 bg-[#161c2d] rounded-2xl border border-white/10">
+          <img src="{{ product.image_url }}" class="w-12 h-14 object-cover rounded-lg border border-white/10 shrink-0" alt="Current image">
+          <div class="text-xs">
+            <p class="text-slate-300 font-medium">Currently using web image URL</p>
           </div>
         </div>
         {% endif %}
@@ -144,13 +151,15 @@
       </label>
       <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         {% for g in product.gallery_images.all %}
+        {% if g.display_url %}
         <div class="relative group rounded-xl overflow-hidden border border-white/10 aspect-[3/4] bg-[#090d16]">
-          <img src="{{ g.image.url }}" class="w-full h-full object-cover" alt="Gallery photo">
+          <img src="{{ g.display_url }}" class="w-full h-full object-cover" alt="Gallery photo">
           <button type="submit" formaction="{% url 'owner_product_delete_gallery_image' g.id %}" onclick="return confirm('Remove this photo from gallery?');"
             class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-90 group-hover:opacity-100 transition shadow">
             ✕
           </button>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
