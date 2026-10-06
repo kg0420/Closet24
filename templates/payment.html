@@ -23,58 +23,31 @@ tracking-wider mb-4">
                 <p class="text-[11px] text-gray-400 mt-2">Scan with Google Pay / Any UPI App</p>
             </div>
 
-            <!-- Direct Intent Buttons for Mobile Users -->
-            <div class="space-y-2 mt-2">
-                <a href="{{ upi_url }}" class="block w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white py-3 px-5 rounded-full font-medium transition shadow-sm flex items-center justify-center gap-2 text-sm">
+            <!-- Direct 1-Click Redirect Buttons for Mobile Users -->
+            <div class="space-y-2.5 mt-2">
+                <a href="{{ gpay_url }}" class="block w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white py-3.5 px-6 rounded-full font-medium transition shadow-sm flex items-center justify-center gap-2 text-sm">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
-                    Pay via UPI App (GPay / PhonePe / Paytm)
+                    Pay ₹{{ amount }} via Google Pay
                 </a>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ phonepe_url }}" class="block w-full bg-[#5f259f] hover:bg-[#4d1e82] text-white py-2 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
-                        Open PhonePe
+                    <a href="{{ phonepe_url }}" class="block w-full bg-[#5f259f] hover:bg-[#4d1e82] text-white py-2.5 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
+                        Pay via PhonePe
                     </a>
-                    <a href="{{ paytm_url }}" class="block w-full bg-[#002e6e] hover:bg-[#001f4d] text-white py-2 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
-                        Open Paytm
+                    <a href="{{ paytm_url }}" class="block w-full bg-[#002e6e] hover:bg-[#001f4d] text-white py-2.5 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
+                        Pay via Paytm
                     </a>
                 </div>
-            </div>
 
-            <!-- Instant Copy UPI ID -->
-            <div class="mt-4 p-3 bg-gray-50 border rounded-2xl">
-                <p class="text-[11px] text-gray-500 mb-1.5 font-medium">Or pay manually in any UPI app:</p>
-                <div class="flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-gray-200">
-                    <span id="upiIdText" class="font-mono text-xs text-ink font-semibold select-all break-all text-left">{{ upi_id }}</span>
-                    <button type="button" onclick="copyUPI()" id="copyBtn" class="shrink-0 bg-ink text-white hover:bg-gray-800 text-[11px] px-3 py-1.5 rounded-lg transition font-medium">
-                        Copy ID
-                    </button>
-                </div>
-                <p id="copySuccessMsg" class="text-[10px] text-emerald-600 mt-1 hidden font-semibold">✓ UPI ID copied! Open GPay, tap 'Pay UPI ID', and paste.</p>
+                <a href="{{ upi_url }}" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 px-4 rounded-full text-xs font-medium transition text-center">
+                    Pay with other UPI App (CRED, BHIM)
+                </a>
             </div>
 
             <div class="border-t mt-5 pt-4 text-left text-xs text-gray-500 space-y-1">
-                <p><b>Payee Name:</b> <span class="text-ink">{{ upi_name }}</span></p>
-                <p class="text-[11px] text-gray-400">If Google Pay shows a warning on web links, scan the QR code directly using your Google Pay scanner or copy the UPI ID above.</p>
+                <p><b>Business Name:</b> <span class="text-ink font-medium">{{ upi_name }}</span></p>
+                <p class="text-[11px] text-gray-400">Desktop users: Scan the QR code with any UPI app to pay directly.</p>
             </div>
-
-            <script>
-            function copyUPI() {
-                var text = document.getElementById("upiIdText").innerText.trim();
-                navigator.clipboard.writeText(text).then(function() {
-                    var btn = document.getElementById("copyBtn");
-                    var msg = document.getElementById("copySuccessMsg");
-                    btn.innerText = "Copied!";
-                    btn.classList.add("bg-emerald-600");
-                    msg.classList.remove("hidden");
-                    setTimeout(function() {
-                        btn.innerText = "Copy ID";
-                        btn.classList.remove("bg-emerald-600");
-                    }, 3000);
-                }).catch(function() {
-                    prompt("Copy UPI ID manually:", text);
-                });
-            }
-            </script>
         </div>
 
         <!-- Verification Form & GST Breakdown -->

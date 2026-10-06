@@ -271,18 +271,24 @@ def payment_page(request, order_id):
     amount = f"{order.total:.2f}"
     note = f"Order #{order.id} Boutique"
 
-    # Construct standard UPI Intent URI
+    # Construct standard NPCI compliant Merchant UPI URI
+    # 'mc=5691' (Men's & Women's Clothing Stores / Apparel)
+    # 'mode=02' (Secure dynamic web intent)
+    # 'tr' (Unique transaction reference ID)
     upi_params = {
         "pa": upi_id,
         "pn": upi_name,
+        "mc": "5691",
+        "tr": f"ORD{order.id}",
         "am": amount,
         "cu": "INR",
-        "tn": f"Order {order.id}",
+        "tn": f"Order #{order.id}",
+        "mode": "02",
     }
     encoded_params = urllib.parse.urlencode(upi_params)
     upi_url = f"upi://pay?{encoded_params}"
 
-    # Dedicated deep-links for major UPI apps
+    # App-specific direct intent URLs
     gpay_url = f"gpay://upi/pay?{encoded_params}"
     phonepe_url = f"phonepe://pay?{encoded_params}"
     paytm_url = f"paytmmp://pay?{encoded_params}"
