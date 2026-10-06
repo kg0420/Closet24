@@ -1,23 +1,62 @@
 {% extends "base.html" %}
-{% block title %}Create Account — Closet 24{% endblock %}
+{% block title %}Create Account — Follow Me Boutique{% endblock %}
 {% block content %}
-<div class="min-h-[70vh] flex items-center justify-center px-5 py-16 bg-cream">
-    <div class="w-full max-w-md bg-white rounded-[2rem] p-8 sm:p-10">
-        <p class="uppercase tracking-[.25em] text-xs text-rose">Join Closet 24</p>
-        <h1 class="display text-4xl mt-2">Create account.</h1>
+<div class="min-h-[75vh] flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-md bg-[#111622] border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-red-950/40 relative overflow-hidden">
+        <div class="absolute -top-16 -right-16 w-36 h-36 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>✨</span> Join Follow Me Boutique
+        </div>
+        <h1 class="display text-3xl sm:text-4xl text-white font-normal">Create Account</h1>
+        <p class="text-xs text-slate-400 mt-1.5 font-medium">Join our community for tailored styling & seamless orders.</p>
+
         <form method="post" class="mt-8 space-y-4">
             {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            
             {% for field in form %}
             <div>
-                <label class="text-xs uppercase tracking-widest text-gray-500">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}<p class="text-xs text-red-500">{{ field.errors|striptags }}</p>{% endif %}
+                <label class="block text-xs font-semibold tracking-wider text-slate-300 uppercase mb-1">{{ field.label }}</label>
+                <div class="register-input-wrapper">
+                    {{ field }}
+                </div>
+                {% if field.errors %}
+                <p class="text-xs text-red-400 mt-1 font-medium">{{ field.errors|striptags }}</p>
+                {% endif %}
             </div>
             {% endfor %}
-            <style>input{width:100%;margin-top:.5rem;border:1px solid #e5e5e5;border-radius:14px;padding:.85rem 1rem;outline:none}</style>
-            <button class="w-full bg-ink text-white rounded-full py-3.5 font-semibold mt-2">Create account</button>
+
+            <style>
+                .register-input-wrapper input {
+                    width: 100%;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 1rem;
+                    padding: 0.75rem 1rem;
+                    font-size: 0.875rem;
+                    background-color: #161c2d;
+                    color: #ffffff;
+                    outline: none;
+                    transition: all 0.2s ease;
+                }
+                .register-input-wrapper input:focus {
+                    background-color: #1a2236;
+                    border-color: #ef4444;
+                    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+                }
+            </style>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl py-3.5 font-semibold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 transition-all transform hover:-translate-y-0.5 mt-3">
+                Join Now ✨
+            </button>
         </form>
-        <p class="text-sm text-gray-500 mt-6">Already have an account? <a class="underline" href="{% url 'login' %}">Sign in</a></p>
+
+        <div class="mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
+            Already have an account? 
+            <a class="text-red-400 font-semibold hover:underline ml-1" href="{% url 'login' %}{% if next and next != 'home' %}?next={{ next|urlencode }}{% endif %}">
+                Sign In 🛍️
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,80 +1,76 @@
 {% extends "owner/base.html" %}
-{% block title %}Customers & Roles — FOLLOW ME{% endblock %}
+{% block title %}Customers & Roles — Follow Me Boutique{% endblock %}
 {% block owner_content %}
-<div class="flex justify-between items-end">
+<div class="flex justify-between items-end border-b border-white/10 pb-6 mb-7">
   <div>
-    <p class="uppercase tracking-widest text-xs text-rose font-semibold">User & Access Control</p>
-    <h1 class="display text-4xl mt-2">Customers & Roles</h1>
-    <p class="text-gray-500 mt-2">Manage customer accounts and assign business owner / admin privileges.</p>
+    <p class="uppercase tracking-widest text-xs text-red-400 font-bold">User & Access Control</p>
+    <h1 class="display text-4xl mt-2 text-white">Customers & Roles</h1>
+    <p class="text-slate-400 mt-1.5 text-sm">Manage customer accounts and assign business owner / admin privileges.</p>
   </div>
 </div>
 
-<div class="bg-white border border-black/5 rounded-3xl mt-7 overflow-x-auto shadow-sm">
+<div class="bg-[#111622] border border-white/10 rounded-3xl overflow-x-auto shadow-2xl">
   <table class="w-full text-sm">
-    <thead class="bg-[#fbfaf8] text-xs uppercase tracking-widest border-b border-black/5">
+    <thead class="bg-[#0d121c] text-xs uppercase tracking-widest border-b border-white/10">
       <tr>
-        <th class="text-left p-4 font-semibold text-gray-500">User</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Email</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Joined</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Orders</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Total Spent</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Role & Access</th>
-        <th class="p-4 text-right font-semibold text-gray-500">Actions</th>
+        <th class="text-left p-4 font-semibold text-slate-400">User</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Email</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Joined</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Orders</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Total Spent</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Role & Access</th>
+        <th class="p-4 text-right font-semibold text-slate-400">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-black/5">
+    <tbody class="divide-y divide-white/5">
       {% for c in customers %}
-      <tr class="hover:bg-cream/40 transition">
+      <tr class="hover:bg-[#161c2d] transition">
         <td class="p-4">
-          <div class="font-semibold text-ink flex items-center gap-2">
+          <div class="font-semibold text-white flex items-center gap-2">
             <span>{{ c.username }}</span>
             {% if c == user %}
-            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">(You)</span>
+            <span class="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-medium border border-red-500/30">(You)</span>
             {% endif %}
           </div>
           {% if c.get_full_name %}
-          <div class="text-xs text-gray-400">{{ c.get_full_name }}</div>
+          <div class="text-xs text-slate-400">{{ c.get_full_name }}</div>
           {% endif %}
         </td>
-        <td class="p-4 text-gray-600 text-xs">{{ c.email|default:"—" }}</td>
-        <td class="p-4 text-gray-500 text-xs">{{ c.date_joined|date:"d M Y" }}</td>
+        <td class="p-4 text-slate-400 text-xs">{{ c.email|default:"—" }}</td>
+        <td class="p-4 text-slate-400 text-xs">{{ c.date_joined|date:"d M Y" }}</td>
         <td class="p-4">
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#161c2d] border border-white/10 text-slate-200">
             {{ c.order_count }} order{{ c.order_count|pluralize }}
           </span>
         </td>
-        <td class="p-4 font-medium text-ink">
+        <td class="p-4 font-medium text-white">
           ₹{{ c.total_spent|default:0|floatformat:0 }}
         </td>
         <td class="p-4">
           {% if c.is_superuser or c.profile.role == 'owner' %}
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose/10 text-rose border border-rose/20">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
             👑 Business Owner
           </span>
           {% else %}
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#161c2d] border border-white/10 text-slate-300">
             👤 Customer
           </span>
           {% endif %}
         </td>
         <td class="p-4 text-right whitespace-nowrap">
           {% if c != user %}
-          <form method="post" action="{% url 'owner_customer_toggle_role' c.id %}" class="inline-block" onsubmit="return confirm('Change permissions for {{ c.username|escapejs }}?');">
+          <form method="post" action="{% url 'owner_customer_toggle_role' c.id %}" class="inline-block">
             {% csrf_token %}
-            {% if c.profile.role == 'owner' or c.is_staff %}
-            <button type="submit" class="text-xs font-medium text-amber-700 hover:text-amber-900 border border-amber-300 rounded-lg px-3 py-1.5 hover:bg-amber-50 transition">Demote to Customer</button>
+            {% if c.profile.role == 'owner' %}
+            <button type="submit" class="text-xs text-amber-400 hover:underline font-semibold">Demote to Customer</button>
             {% else %}
-            <button type="submit" class="text-xs font-medium text-emerald-700 hover:text-emerald-900 border border-emerald-300 rounded-lg px-3 py-1.5 hover:bg-emerald-50 transition">Promote to Owner</button>
+            <button type="submit" class="text-xs text-red-400 hover:underline font-semibold">Promote to Owner</button>
             {% endif %}
           </form>
           {% else %}
-          <span class="text-xs text-gray-400 italic">Active Account</span>
+          <span class="text-xs text-slate-500 italic">Protected</span>
           {% endif %}
         </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="7" class="p-10 text-center text-gray-400">No users found.</td>
       </tr>
       {% endfor %}
     </tbody>

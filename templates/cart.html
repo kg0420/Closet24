@@ -1,44 +1,154 @@
 {% extends "base.html" %}
-{% block title %}Shopping Bag — Closet 24{% endblock %}
+{% block title %}Shopping Bag — Follow Me Boutique{% endblock %}
 {% block content %}
-<div class="max-w-5xl mx-auto px-5 lg:px-8 py-12">
-    <p class="uppercase tracking-[.25em] text-xs text-rose">Your selection</p>
-    <h1 class="display text-5xl mt-2 mb-10">Shopping bag.</h1>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/10 pb-6 mb-8 gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>🛍️</span> Curated Selection
+            </div>
+            <h1 class="display text-4xl sm:text-5xl font-normal text-white">Your Shopping Bag</h1>
+        </div>
+        {% if items %}
+        <p class="text-xs sm:text-sm text-slate-400 font-medium">
+            Review your chosen pieces before stepping into checkout ✨
+        </p>
+        {% endif %}
+    </div>
+
     {% if items %}
-    <div class="grid lg:grid-cols-[1fr_340px] gap-10">
-        <div class="divide-y border-y">
-            {% for item in items %}
-            <div class="py-6 flex gap-5">
-                <div class="w-28 h-36 rounded-xl bg-cream overflow-hidden shrink-0">
-                    {% if item.product.display_image %}<img src="{{ item.product.display_image }}" class="w-full h-full object-cover">{% endif %}
-                </div>
-                <div class="flex-1">
-                    <div class="flex justify-between gap-4">
-                        <div><h3 class="font-semibold">{{ item.product.name }}</h3><p class="text-xs text-gray-500 mt-1">Size: {{ item.size|default:"One size" }}</p></div>
-                        <p class="font-semibold">₹{{ item.subtotal|floatformat:0 }}</p>
+    <div class="grid lg:grid-cols-[1fr_380px] gap-8 lg:gap-12 items-start">
+        <!-- Cart Items List -->
+        <div class="space-y-4">
+            <div class="divide-y divide-white/5 bg-[#111622] rounded-3xl border border-white/10 p-4 sm:p-6 shadow-xl">
+                {% for item in items %}
+                <div class="py-6 first:pt-2 last:pb-2 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+                    <!-- Product Image -->
+                    <div class="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl bg-[#090d16] border border-white/10 overflow-hidden shrink-0 group relative shadow-inner">
+                        {% if item.product.display_image %}
+                        <img src="{{ item.product.display_image }}" alt="{{ item.product.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-3xl">👕</div>
+                        {% endif %}
                     </div>
-                    <form method="post" action="{% url 'update_cart' item.key %}" class="mt-6 flex items-center gap-2">
-                        {% csrf_token %}
-                        <input type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}" class="w-20 border rounded-full px-4 py-2 text-sm">
-                        <button class="text-xs underline">Update</button>
-                        <a href="{% url 'remove_from_cart' item.key %}" class="text-xs text-red-500 ml-3">Remove</a>
-                    </form>
+
+                    <!-- Details & Controls -->
+                    <div class="flex-1 w-full flex flex-col justify-between">
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <a href="{% url 'product_detail' item.product.slug %}" class="font-semibold text-base sm:text-lg text-white hover:text-red-400 transition">
+                                    {{ item.product.name }}
+                                </a>
+                                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#161c2d] text-slate-200 border border-white/10">
+                                        Size: {{ item.size|default:"Free Size" }}
+                                    </span>
+                                    <span class="text-xs text-slate-500">
+                                        • In Stock: {{ item.product.stock }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold text-white">₹{{ item.subtotal|floatformat:0 }}</p>
+                                <p class="text-[11px] text-slate-400 font-medium">₹{{ item.product.price|floatformat:0 }} each</p>
+                            </div>
+                        </div>
+
+                        <!-- Quantity form & Remove action -->
+                        <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between flex-wrap gap-3">
+                            <form method="post" action="{% url 'update_cart' item.key %}" class="flex items-center gap-2">
+                                {% csrf_token %}
+                                <label class="text-xs text-slate-400 font-medium">Qty:</label>
+                                <input type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}" 
+                                       class="w-16 sm:w-20 bg-[#161c2d] text-white border border-white/15 rounded-xl px-3 py-1.5 text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/25 focus:border-red-500 transition">
+                                <button type="submit" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white/10 hover:bg-red-600 text-white transition">
+                                    Update
+                                </button>
+                            </form>
+
+                            <a href="{% url 'remove_from_cart' item.key %}" class="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300 font-medium transition hover:underline">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Remove item
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Guarantee banner -->
+            <div class="bg-[#111622] rounded-2xl border border-white/10 p-4 flex items-center gap-3 text-xs text-slate-300 shadow-sm">
+                <span class="text-xl">✨</span>
+                <p><b>100% Quality Assurance:</b> Every garment is hand-inspected at Follow Me Boutique before pickup or dispatch.</p>
+            </div>
+        </div>
+
+        <!-- Order Summary Card -->
+        <aside class="bg-[#111622] rounded-3xl p-6 sm:p-7 border border-white/10 shadow-xl sticky top-28">
+            <h2 class="display text-2xl text-white font-normal mb-5 flex items-center justify-between">
+                <span>Order Summary</span>
+                <span class="text-base text-slate-400 font-sans">🧾</span>
+            </h2>
+
+            <div class="space-y-3 text-sm pb-5 border-b border-white/10">
+                <div class="flex justify-between text-slate-300">
+                    <span>Items Subtotal</span>
+                    <span class="font-semibold text-white">₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Shipping & Fulfillment</span>
+                    <span class="text-emerald-400 font-semibold">Free Store Pickup / Direct</span>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        <aside class="bg-cream rounded-3xl p-7 h-fit">
-            <h2 class="display text-2xl">Summary</h2>
-            <div class="flex justify-between mt-6 text-sm"><span>Subtotal</span><b>₹{{ total|floatformat:0 }}</b></div>
-            <div class="flex justify-between mt-3 text-sm text-gray-500"><span>Shipping</span><span>Calculated at checkout</span></div>
-            <div class="border-t mt-6 pt-5 flex justify-between"><span class="font-semibold">Total</span><b class="text-xl">₹{{ total|floatformat:0 }}</b></div>
-            <a href="{% url 'checkout' %}" class="block text-center bg-ink text-white rounded-full py-3.5 mt-6 font-semibold">Checkout →</a>
+
+            <div class="pt-5 pb-6">
+                <div class="flex justify-between items-baseline">
+                    <div>
+                        <span class="font-bold text-base text-white block">Grand Total</span>
+                        <span class="text-[11px] text-slate-400">Total payable at checkout</span>
+                    </div>
+                    <b class="text-2xl sm:text-3xl font-extrabold text-white">₹{{ total|floatformat:2 }}</b>
+                </div>
+            </div>
+
+            <a href="{% url 'checkout' %}" class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl py-4 font-semibold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 transition-all transform hover:-translate-y-0.5">
+                <span>Proceed to Checkout</span>
+                <span>🛍️ →</span>
+            </a>
+
+            <div class="mt-6 pt-5 border-t border-white/10 space-y-2 text-center">
+                <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+                    <span>🔒</span> SSL Secure • UPI & Local Instant Payment
+                </p>
+                <a href="{% url 'shop' %}" class="inline-block text-xs text-slate-400 hover:text-white font-medium underline mt-1">
+                    ← Or continue shopping
+                </a>
+            </div>
         </aside>
     </div>
     {% else %}
-    <div class="py-24 text-center border-y">
-        <p class="display text-4xl">Your bag is empty.</p>
-        <a href="{% url 'shop' %}" class="inline-block mt-6 bg-ink text-white rounded-full px-7 py-3.5">Continue shopping</a>
+    <!-- Empty Cart State -->
+    <div class="py-20 sm:py-28 text-center max-w-md mx-auto bg-[#111622] rounded-3xl border border-white/10 p-8 sm:p-12 shadow-2xl">
+        <div class="w-20 h-20 mx-auto rounded-3xl bg-[#161c2d] border border-white/10 flex items-center justify-center text-4xl shadow-inner mb-6">
+            🛍️
+        </div>
+        <h2 class="display text-3xl text-white">Your bag is empty</h2>
+        <p class="text-sm text-slate-400 mt-2 max-w-xs mx-auto">
+            Discover our hand-picked styles in shirts, premium denim jeans, and baggy fits.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'shop' %}" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-semibold shadow-lg shadow-red-600/30 transition transform hover:-translate-y-0.5">
+                <span>Explore Men's Styles</span>
+                <span>✨</span>
+            </a>
+        </div>
+        <div class="mt-8 pt-6 border-t border-white/10 flex items-center justify-center gap-4 text-xl">
+            <span title="Shirts">👕</span>
+            <span title="Jeans">👖</span>
+            <span title="Trousers">👔</span>
+            <span title="Jackets">🧥</span>
+        </div>
     </div>
     {% endif %}
 </div>

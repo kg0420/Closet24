@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}My Orders — Closet 24{% endblock %}
+{% block title %}My Orders — Follow Me Boutique{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-auto px-5 lg:px-8 py-12">
-    <div class="flex justify-between items-end mb-8">
+    <div class="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
         <div>
-            <p class="uppercase tracking-widest text-xs text-rose font-bold">Purchase History</p>
-            <h1 class="display text-4xl lg:text-5xl mt-2">My Orders.</h1>
+            <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Purchase History</p>
+            <h1 class="display text-4xl lg:text-5xl mt-2 text-white">My Orders.</h1>
         </div>
-        <a href="{% url 'shop' %}" class="text-xs uppercase tracking-wider text-rose hover:underline font-semibold">Browse Shop →</a>
+        <a href="{% url 'shop' %}" class="text-xs uppercase tracking-wider text-red-400 hover:text-red-300 hover:underline font-semibold">Browse Shop →</a>
     </div>
 
     <div class="space-y-5">
         {% for order in orders %}
-        <div class="border border-black/5 bg-white rounded-3xl p-6 shadow-sm hover:border-black/10 transition">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-black/5 pb-4">
+        <div class="border border-white/10 bg-[#111622] rounded-3xl p-6 shadow-xl hover:border-red-500/40 transition">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
                 <div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-lg text-ink">Order #{{ order.id }}</span>
-                        <span class="rounded-full bg-cream px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-700">
+                        <span class="font-bold text-lg text-white">Order #{{ order.id }}</span>
+                        <span class="rounded-full bg-[#161c2d] border border-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                             {{ order.status }}
                         </span>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+                    <p class="text-xs text-slate-400 mt-1">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div class="text-right">
-                        <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Total Paid</p>
-                        <p class="text-base font-bold text-ink">₹{{ order.total|floatformat:0 }}</p>
+                        <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Paid</p>
+                        <p class="text-base font-bold text-white">₹{{ order.total|floatformat:0 }}</p>
                     </div>
                 </div>
             </div>
@@ -36,42 +36,45 @@
             <div class="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="space-y-1 text-xs">
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500">Payment:</span>
+                        <span class="text-slate-400">Payment:</span>
                         {% if order.payment_status == 'Paid' %}
-                        <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs">
+                        <span class="inline-flex items-center gap-1 font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-xs">
                             ✓ Payment Completed & Verified
                         </span>
                         {% else %}
-                        <span class="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs">
+                        <span class="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-950/50 border border-amber-500/30 px-2.5 py-0.5 rounded-full text-xs">
                             ⏳ {{ order.payment_status }}
                         </span>
                         {% endif %}
                     </div>
                     {% if order.payment_reference %}
-                    <p class="text-gray-500 font-mono">
-                        Ref / UTR: <span class="text-gray-800">{{ order.payment_reference }}</span>
+                    <p class="text-slate-400 font-mono">
+                        Ref / UTR: <span class="text-slate-200">{{ order.payment_reference }}</span>
                     </p>
                     {% endif %}
                 </div>
 
-                <div>
+                <div class="flex flex-wrap items-center gap-2">
                     {% if order.payment_status == 'Paid' %}
-                    <a href="{% url 'download_receipt' order.id %}" target="_blank" class="inline-flex items-center gap-1.5 bg-ink hover:bg-black text-white px-5 py-2.5 rounded-full text-xs font-semibold transition shadow-sm">
+                    <a href="{% url 'download_receipt' order.id %}" target="_blank" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition shadow-sm border border-white/10">
                         <span>📄</span> Download Tax Invoice
                     </a>
                     {% else %}
-                    <div class="flex items-center gap-1.5 text-xs text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl">
+                    <a href="{% url 'payment_page' order.id %}" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2 rounded-full text-xs font-semibold transition shadow-md shadow-red-600/30">
+                        <span>💳</span> Pay / Enter UTR →
+                    </a>
+                    <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-[#161c2d] border border-white/10 px-3 py-2 rounded-xl">
                         <span>🔒</span>
-                        <span>Invoice unlocks upon payment verification</span>
+                        <span>Invoice unlocks upon verification</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="bg-white border rounded-3xl p-12 text-center text-gray-400 space-y-3">
+        <div class="bg-[#111622] border border-white/10 rounded-3xl p-12 text-center text-slate-400 space-y-3 shadow-xl">
             <p>You haven't placed any orders yet.</p>
-            <a href="{% url 'shop' %}" class="inline-block bg-ink text-white rounded-full px-6 py-2.5 text-xs font-semibold">Start Shopping</a>
+            <a href="{% url 'shop' %}" class="inline-block bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-6 py-2.5 text-xs font-semibold shadow-md shadow-red-600/30">Start Shopping</a>
         </div>
         {% endfor %}
     </div>

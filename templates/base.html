@@ -1,24 +1,44 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Closet 24 — Boutique{% endblock %}</title>
+    <title>{% block title %}Follow Me Boutique — Premium Men's Fashion{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         display: ['Playfair Display', 'serif'],
-                        sans: ['Inter', 'sans-serif']
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
                     },
                     colors: {
-                        ink: '#181616',
-                        cream: '#f7f3ed',
-                        rose: '#b66e6e',
-                        sand: '#e9dfd2'
+                        ink: '#f8fafc',
+                        obsidian: '#080b11',
+                        surface: '#111622',
+                        charcoal: '#161c2d',
+                        cream: '#111622',
+                        rose: {
+                            DEFAULT: '#ef4444',
+                            hover: '#dc2626',
+                            light: '#fee2e2'
+                        },
+                        red: {
+                            DEFAULT: '#ef4444',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c'
+                        },
+                        gold: '#f59e0b',
+                        jeans: '#3b82f6'
+                    },
+                    boxShadow: {
+                        'glow-red': '0 0 30px -5px rgba(239, 68, 68, 0.4)',
+                        'glow-rose': '0 0 30px -5px rgba(239, 68, 68, 0.4)',
+                        'glow-subtle': '0 10px 30px -10px rgba(0, 0, 0, 0.6)'
                     }
                 }
             }
@@ -26,101 +46,209 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        html { scroll-behavior:smooth; }
-        body { font-family:Inter,sans-serif; }
-        .display { font-family:'Playfair Display',serif; }
-        .grain { background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E"); }
-        .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #080b11; 
+            color: #f1f5f9; 
+        }
+        .display { font-family: 'Playfair Display', serif; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+        .animate-float {
+            animation: floatSlow 3.8s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.04); opacity: 0.9; }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2.4s ease-in-out infinite;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #ef4444 65%, #f87171 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-header {
+            background: rgba(8, 11, 17, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-white text-ink">
-    <div class="bg-ink text-white text-center text-xs tracking-[.25em] py-2 uppercase">
-        New season drop is live · Free local pickup · DM us on Instagram
-    </div>
+<body class="bg-[#080b11] text-slate-100 antialiased selection:bg-red-900 selection:text-white">
 
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-black/5">
+    <!-- Glassmorphism Floating Header -->
+    <header class="sticky top-0 z-50 glass-header transition-all duration-200">
         <div class="max-w-7xl mx-auto px-5 lg:px-8 h-20 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="display text-2xl lg:text-3xl tracking-tight">Closet 24<span class="text-rose">.</span></a>
+            <!-- Boutique Logo -->
+            <a href="{% url 'home' %}" class="group flex items-center gap-2">
+                <span class="display text-2xl lg:text-3xl font-bold tracking-tight text-white transition group-hover:opacity-90">
+                    Follow Me<span class="text-red-500 inline-block transition-transform duration-300 group-hover:scale-125">.</span>
+                </span>
+                <span class="hidden sm:inline-block text-[10px] uppercase font-bold tracking-[.2em] bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-0.5 rounded-full">
+                    Men's Boutique ✨
+                </span>
+            </a>
 
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-                <a class="hover:text-rose transition" href="{% url 'home' %}">Home</a>
-                <a class="hover:text-rose transition" href="{% url 'shop' %}">Shop</a>
-                <a class="hover:text-rose transition" href="{% url 'shop' %}?sort=newest">New In</a>
-                <a class="hover:text-rose transition" href="{% url 'home' %}#about">About</a>
-                <a class="hover:text-rose transition" href="{% url 'home' %}#contact">Contact</a>
+            <!-- Desktop Nav Menu -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold tracking-tight">
+                <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'home' %}">Home</a>
+                <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'shop' %}">All Menswear 🛍️</a>
+                <a class="text-slate-300 hover:text-red-400 transition duration-150 flex items-center gap-1.5" href="{% url 'shop' %}?q=jeans">
+                    <span>👖</span> Jeans & Denim
+                </a>
+                <a class="text-slate-300 hover:text-red-400 transition duration-150 flex items-center gap-1.5" href="{% url 'shop' %}?q=shirt">
+                    <span>👕</span> Shirts & Polos
+                </a>
+                <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'home' %}#about">Our Story</a>
             </nav>
 
-             <div class="flex items-center gap-3">
-                    {% if user.is_authenticated %}
-                        {% if user.is_staff or is_owner %}
-                            <a href="{% url 'owner_dashboard' %}" class="inline-flex items-center text-xs uppercase tracking-wider font-semibold text-rose hover:underline">Owner Panel</a>
-                        {% endif %}
-                        <a href="{% url 'my_orders' %}" class="text-xs uppercase tracking-wider hover:text-rose">My Orders</a>
-                        <a href="{% url 'logout' %}" class="text-xs uppercase tracking-wider text-gray-500 hover:text-ink">Logout</a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="text-xs uppercase tracking-wider">Login</a>
+            <!-- Actions (Login, Orders, Bag) -->
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    {% if user.is_staff or is_owner %}
+                        <a href="{% url 'owner_dashboard' %}" class="hidden sm:inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-bold text-white bg-gradient-to-r from-red-600 to-rose-600 px-3.5 py-1.5 rounded-full shadow-sm hover:opacity-90 transition">
+                            <span>👑</span> Owner Panel
+                        </a>
                     {% endif %}
-                    <a href="{% url 'cart' %}" class="relative border border-black/10 rounded-full px-4 py-2 text-sm hover:bg-ink hover:text-white transition">
-                        Bag <span class="ml-1">({{ cart_count }})</span>
+                    <a href="{% url 'my_orders' %}" class="hidden sm:block text-xs uppercase tracking-wider font-semibold text-slate-300 hover:text-red-400 transition">
+                        My Orders
                     </a>
-                    <button id="menuBtn" class="md:hidden text-xl">☰</button>
-                </div>
+                    <a href="{% url 'logout' %}" class="text-xs uppercase tracking-wider font-medium text-slate-400 hover:text-white transition">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-xs uppercase tracking-widest font-bold text-slate-200 hover:text-red-400 transition px-2">
+                        Sign In
+                    </a>
+                {% endif %}
+
+                <!-- Animated Shopping Bag -->
+                <a href="{% url 'cart' %}" class="group relative flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-4 sm:px-5 py-2.5 text-xs font-semibold shadow-lg shadow-red-600/30 hover:shadow-red-600/50 transition-all duration-200 hover:-translate-y-0.5">
+                    <span class="text-sm">🛍️</span>
+                    <span>Bag</span>
+                    <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white text-red-600 text-[11px] font-bold shadow-sm {% if cart_count > 0 %}animate-pulse-glow{% endif %}">
+                        {{ cart_count }}
+                    </span>
+                </a>
+
+                <!-- Mobile Hamburger Button -->
+                <button id="menuBtn" aria-label="Toggle mobile menu" class="md:hidden w-10 h-10 rounded-xl border border-white/15 text-white flex items-center justify-center text-lg hover:bg-white/10 transition">
+                    ☰
+                </button>
+            </div>
         </div>
-        <div id="mobileMenu" class="hidden md:hidden border-t bg-white px-5 py-4">
-            <div class="grid gap-4 text-sm">
-                <a href="{% url 'home' %}">Home</a>
-                <a href="{% url 'shop' %}">Shop</a>
-                <a href="{% url 'shop' %}?sort=newest">New In</a>
-                <a href="{% url 'home' %}#about">About</a>
-                <a href="{% url 'home' %}#contact">Contact</a>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-white/10 bg-[#0c101a]/98 backdrop-blur-md px-6 py-5 shadow-2xl">
+            <div class="grid gap-3.5 text-sm font-semibold">
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'home' %}">🏠 Home</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}">🛍️ All Menswear</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?q=jeans">👖 Jeans & Denim Edit</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?q=shirt">👕 Shirts & Polos</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?sort=newest">✨ New In This Season</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'home' %}#about">📖 About Follow Me</a>
+                {% if user.is_authenticated and is_owner %}
+                    <a class="py-1 text-red-400 font-bold" href="{% url 'owner_dashboard' %}">👑 Owner Management</a>
+                {% endif %}
             </div>
         </div>
     </header>
 
     {% if messages %}
-    <div class="fixed top-24 right-5 z-[60] w-[min(92vw,380px)] space-y-2">
+    <div class="fixed top-24 right-5 z-[60] w-[min(92vw,380px)] space-y-2.5">
         {% for message in messages %}
-            <div class="rounded-2xl bg-ink text-white px-5 py-4 shadow-xl text-sm">{{ message }}</div>
+            <div class="rounded-2xl bg-[#111622] text-white px-5 py-4 shadow-2xl border border-red-500/30 text-sm flex items-start gap-3 backdrop-blur-md animate-float">
+                <span class="text-lg">✨</span>
+                <span class="flex-1 font-medium">{{ message }}</span>
+            </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <main>{% block content %}{% endblock %}</main>
+    <main class="min-h-[calc(100vh-280px)]">
+        {% block content %}{% endblock %}
+    </main>
 
-    <footer id="contact" class="bg-ink text-white mt-24">
-        <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 grid md:grid-cols-4 gap-10">
-            <div class="md:col-span-2">
-                <div class="display text-3xl mb-3">Closet 24<span class="text-rose">.</span></div>
-                <p class="text-white/60 max-w-md leading-7">Everyday fashion, thoughtfully selected. Discover easy-to-wear pieces that make your personal style feel effortless.</p>
-            </div>
-            <div>
-                <p class="uppercase tracking-[.2em] text-xs text-white/40 mb-4">Explore</p>
-                <div class="grid gap-3 text-sm text-white/70">
-                    <a href="{% url 'shop' %}">All Products</a>
-                    <a href="{% url 'shop' %}?sort=newest">New Arrivals</a>
-                    <a href="{% url 'cart' %}">Shopping Bag</a>
+    <!-- Luxury Dark Footer with Developer Badge -->
+    <footer id="contact" class="bg-gradient-to-b from-[#080b11] via-[#05070b] to-[#020305] text-white mt-24 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 lg:py-20 grid md:grid-cols-4 gap-12">
+            <div class="md:col-span-2 space-y-4">
+                <div class="display text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                    Follow Me<span class="text-red-500">.</span>
+                </div>
+                <p class="text-slate-400 max-w-md leading-relaxed text-sm">
+                    Curated exclusively for adult men. Premium collections of designer denim jeans, casual & formal shirts, modern baggy fits, and tailored menswear essentials.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-2 text-xs">
+                    <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">👖 Premium Jeans</span>
+                    <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">👕 100% Combed Cotton</span>
+                    <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">⚡ 1-Click UPI Payment</span>
                 </div>
             </div>
+
             <div>
-                <p class="uppercase tracking-[.2em] text-xs text-white/40 mb-4">Connect</p>
-                <div class="grid gap-3 text-sm text-white/70">
-                    <a href="https://www.instagram.com/follow_me_boutique.55/" target="_blank">Instagram</a>
-                    <a href="https://wa.me/" target="_blank">WhatsApp</a>
-                    <span>Mon–Sat · 10 AM–8 PM</span>
+                <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400 mb-4">Quick Shop</p>
+                <div class="grid gap-2.5 text-sm text-slate-400">
+                    <a class="hover:text-red-400 transition flex items-center gap-1.5" href="{% url 'shop' %}"><span>🛍️</span> All Menswear</a>
+                    <a class="hover:text-red-400 transition flex items-center gap-1.5" href="{% url 'shop' %}?q=jeans"><span>👖</span> Denim & Jeans</a>
+                    <a class="hover:text-red-400 transition flex items-center gap-1.5" href="{% url 'shop' %}?q=shirt"><span>👕</span> Shirts & Polos</a>
+                    <a class="hover:text-red-400 transition flex items-center gap-1.5" href="{% url 'shop' %}?sort=newest"><span>✨</span> Fresh Arrivals</a>
+                    <a class="hover:text-red-400 transition flex items-center gap-1.5" href="{% url 'cart' %}"><span>🛒</span> Shopping Bag</a>
+                </div>
+            </div>
+
+            <div>
+                <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400 mb-4">Boutique Desk</p>
+                <div class="grid gap-2.5 text-sm text-slate-400">
+                    <a href="https://www.instagram.com/follow_me_boutique.55/" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
+                        <span>📸</span> Instagram @follow_me
+                    </a>
+                    <a href="https://wa.me/" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
+                        <span>💬</span> WhatsApp Direct Order
+                    </a>
+                    <span class="text-xs text-slate-500 pt-1">🕒 Store Hours: Mon–Sat · 10 AM–8 PM</span>
+                    <span class="text-xs text-slate-500">📍 Free Local Store Pickup Available</span>
                 </div>
             </div>
         </div>
-        <div class="border-t border-white/10 py-5 text-center text-xs text-white/40">© 2026 Closet 24 Boutique. All rights reserved.</div>
+
+        <!-- Developer Signature & Copyright Bar -->
+        <div class="border-t border-white/10 bg-black/60 py-6 px-5">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+                <div>
+                    © 2026 Follow Me Boutique. All rights reserved.
+                </div>
+                <div class="flex items-center gap-2 font-medium bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/30 text-slate-300 hover:border-red-500 transition">
+                    <span>✨</span>
+                    <span>Designed & Crafted with <span class="text-red-500 font-bold">♥</span> by Developer</span>
+                    <span>🚀</span>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
         const btn = document.getElementById('menuBtn');
         const menu = document.getElementById('mobileMenu');
-        if (btn) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
-        setTimeout(() => document.querySelectorAll('.fixed .bg-ink').forEach(e => e.parentElement.remove()), 4500);
+        if (btn && menu) {
+            btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+        }
+        setTimeout(() => {
+            const toastContainer = document.querySelector('.fixed.top-24');
+            if (toastContainer) toastContainer.remove();
+        }, 4500);
     </script>
     {% block scripts %}{% endblock %}
 </body>

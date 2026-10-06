@@ -1,36 +1,40 @@
 {% extends "owner/base.html" %}
-{% block title %}Store & Payment Settings — FOLLOW ME{% endblock %}
+{% block title %}Store & Payment Settings — Follow Me Boutique{% endblock %}
 {% block owner_content %}
 <div class="max-w-2xl">
-  <p class="uppercase tracking-widest text-xs text-rose font-semibold">Store Configuration</p>
-  <h1 class="display text-4xl mt-2">Store & Payment Settings</h1>
-  <p class="text-gray-500 mt-2">Configure boutique brand details and direct UPI / Google Pay credentials.</p>
+  <div class="border-b border-white/10 pb-6 mb-7">
+    <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Store Configuration</p>
+    <h1 class="display text-4xl mt-2 text-white">Store & Payment Settings</h1>
+    <p class="text-slate-400 mt-1.5 text-sm">Configure boutique brand details and direct UPI / Google Pay credentials.</p>
+  </div>
 
-  <form method="post" class="bg-white border border-black/5 rounded-3xl p-7 mt-6 space-y-5 shadow-sm">
+  <form method="post" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
     {% csrf_token %}
     <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Store / Boutique Name</label>
-      <input name="shop_name" value="{{ settings_obj.shop_name }}" placeholder="e.g. FOLLOW ME Boutique">
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">Store / Boutique Name</label>
+      <input name="shop_name" value="{{ settings_obj.shop_name }}" placeholder="e.g. Follow Me Boutique">
     </div>
     <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">Business Phone / WhatsApp</label>
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">Business Phone / WhatsApp</label>
       <input name="phone" value="{{ settings_obj.phone }}" placeholder="+91 98765 43210">
     </div>
     <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">UPI ID (VPA)</label>
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">UPI ID (VPA)</label>
       <input name="upi_id" value="{{ settings_obj.upi_id }}" placeholder="e.g. yourbusiness@okhdfcbank">
     </div>
     <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">UPI Payee / Account Name</label>
-      <input name="upi_name" value="{{ settings_obj.upi_name }}" placeholder="e.g. FOLLOW ME BOUTIQUE">
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">UPI Payee / Account Name</label>
+      <input name="upi_name" value="{{ settings_obj.upi_name }}" placeholder="e.g. Follow Me Boutique">
     </div>
 
-    <button type="submit" class="bg-ink text-white rounded-full px-7 py-3.5 text-sm font-medium hover:bg-black/80 transition">Save Settings</button>
+    <button type="submit" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-bold shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5 mt-2">
+      Save Settings
+    </button>
   </form>
 
-  <div class="bg-cream rounded-3xl p-6 mt-6 text-sm leading-relaxed border border-black/5">
-    <b class="text-ink">Direct UPI / Google Pay Workflow</b>
-    <ol class="list-decimal list-inside space-y-1 text-gray-600 mt-2">
+  <div class="bg-[#111622] rounded-3xl p-6 mt-6 text-sm leading-relaxed border border-white/10 text-slate-300 shadow-xl">
+    <b class="text-white text-base">Direct UPI / Google Pay Workflow</b>
+    <ol class="list-decimal list-inside space-y-1.5 text-slate-400 mt-3 text-xs sm:text-sm">
       <li>Customer builds a cart and enters shipping details at checkout.</li>
       <li>At the payment screen, a dynamic QR code and Google Pay deep-links are presented.</li>
       <li>Customer transfers funds to your UPI ID and enters their 12-digit UTR transaction ID.</li>
@@ -42,15 +46,19 @@
 <style>
   input {
     width: 100%;
-    border: 1px solid #e5e5e5;
-    border-radius: 14px;
-    padding: .85rem 1rem;
-    font-size: .875rem;
-    transition: border-color .15s;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background-color: #161c2d;
+    color: #ffffff;
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.15s ease;
   }
   input:focus {
-    outline: none;
-    border-color: #111;
+    background-color: #1a2236;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
   }
 </style>
 {% endblock %}

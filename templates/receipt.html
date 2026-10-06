@@ -174,17 +174,21 @@
       <div class="mt-8 border-t border-gray-200 pt-6 flex flex-col sm:flex-row justify-between items-start gap-6">
         <div class="text-xs text-gray-500 space-y-1">
           <p class="font-semibold text-gray-700">Tax Breakdown Notice</p>
+          {% if order.total_tax > 0 %}
           <p>• Prices include goods and services tax according to Indian GST regulations.</p>
           {% if order.cgst > 0 or order.sgst > 0 %}
           <p>• Intra-state supply: CGST & SGST split equally (State: {{ order.state }}).</p>
-          {% else %}
+          {% elif order.igst > 0 %}
           <p>• Inter-state supply: Integrated GST (IGST) applied (Destination: {{ order.state }}).</p>
+          {% endif %}
+          {% else %}
+          <p>• All prices are inclusive of applicable charges.</p>
           {% endif %}
         </div>
 
         <div class="w-full sm:w-80 space-y-2 text-sm bg-gray-50 p-5 rounded-2xl border border-gray-100">
           <div class="flex justify-between text-gray-600">
-            <span>Subtotal (Base Value):</span>
+            <span>Subtotal:</span>
             <span class="font-medium text-gray-900">₹{{ order.subtotal|floatformat:2 }}</span>
           </div>
           {% if order.cgst > 0 or order.sgst > 0 %}
@@ -196,16 +200,18 @@
             <span>State GST (SGST):</span>
             <span>₹{{ order.sgst|floatformat:2 }}</span>
           </div>
-          {% else %}
+          {% elif order.igst > 0 %}
           <div class="flex justify-between text-gray-600 text-xs">
             <span>Integrated GST (IGST):</span>
             <span>₹{{ order.igst|floatformat:2 }}</span>
           </div>
           {% endif %}
+          {% if order.total_tax > 0 %}
           <div class="flex justify-between text-gray-600 text-xs border-b border-gray-200 pb-2">
             <span>Total Taxes:</span>
             <span>₹{{ order.total_tax|floatformat:2 }}</span>
           </div>
+          {% endif %}
           <div class="flex justify-between text-base font-extrabold text-gray-900 pt-1">
             <span>Grand Total Paid:</span>
             <span>₹{{ order.total|floatformat:2 }}</span>

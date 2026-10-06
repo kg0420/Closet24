@@ -1,83 +1,101 @@
 {% extends "owner/base.html" %}
-{% block title %}Products — FOLLOW ME{% endblock %}
+{% block title %}Products — Follow Me Boutique{% endblock %}
 {% block owner_content %}
-<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6">
   <div>
-    <p class="uppercase tracking-widest text-xs text-rose font-semibold">Catalogue</p>
-    <h1 class="display text-4xl mt-2">Products</h1>
-    <p class="text-gray-500 mt-2">Add, edit, stock, and manage boutique catalog items.</p>
+    <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Catalogue Management</p>
+    <h1 class="display text-4xl mt-2 text-white">Products</h1>
+    <p class="text-slate-400 mt-1.5 text-sm">Add, edit, stock, and manage boutique catalog items.</p>
   </div>
   <div class="flex items-center gap-3">
-    <a href="{% url 'owner_categories' %}" class="border border-black/10 rounded-full px-5 py-3 text-sm font-medium hover:bg-cream transition">Manage Categories</a>
-    <a href="{% url 'owner_product_new' %}" class="bg-ink text-white rounded-full px-5 py-3 text-sm font-medium hover:bg-black/80 transition">+ Add Product</a>
+    <a href="{% url 'owner_categories' %}" class="border border-white/15 text-slate-300 rounded-full px-5 py-3 text-sm font-medium hover:bg-white/10 transition">Manage Categories</a>
+    <a href="{% url 'owner_product_new' %}" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-6 py-3 text-sm font-bold shadow-lg shadow-red-600/30 transition">+ Add Product</a>
   </div>
 </div>
 
-<div class="bg-white border border-black/5 rounded-3xl mt-7 overflow-x-auto shadow-sm">
+<!-- Search & Sort Filter Bar -->
+<div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+  <form class="flex flex-1 sm:max-w-md gap-2" method="get">
+    <input name="q" value="{{ query }}" placeholder="Search products by name..." 
+           class="flex-1 border border-white/15 rounded-full px-5 py-2.5 text-sm outline-none bg-[#111622] text-white focus:border-red-500 placeholder:text-slate-500">
+    <select name="sort" onchange="this.form.submit()" 
+            class="border border-white/15 rounded-full px-4 py-2.5 text-sm bg-[#111622] text-slate-200 cursor-pointer focus:border-red-500">
+      <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+      <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+      <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+      <option value="stock_low" {% if sort == 'stock_low' %}selected{% endif %}>Low Stock First</option>
+    </select>
+    {% if query %}
+    <a href="{% url 'owner_products' %}" class="inline-flex items-center text-xs text-red-400 hover:underline px-2">Clear</a>
+    {% endif %}
+  </form>
+  <span class="text-xs text-slate-400">Total: {{ products.count }} item{{ products.count|pluralize }}</span>
+</div>
+
+<div class="bg-[#111622] border border-white/10 rounded-3xl mt-4 overflow-x-auto shadow-2xl">
   <table class="w-full text-sm">
-    <thead class="bg-[#fbfaf8] text-xs uppercase tracking-widest border-b border-black/5">
+    <thead class="bg-[#0d121c] text-xs uppercase tracking-widest border-b border-white/10">
       <tr>
-        <th class="text-left p-4 font-semibold text-gray-500">Item</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Category</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Price (GST Inc.)</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Stock</th>
-        <th class="text-left p-4 font-semibold text-gray-500">Badges</th>
-        <th class="p-4 text-right font-semibold text-gray-500">Actions</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Item</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Category</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Price</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Stock</th>
+        <th class="text-left p-4 font-semibold text-slate-400">Badges</th>
+        <th class="p-4 text-right font-semibold text-slate-400">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-black/5">
+    <tbody class="divide-y divide-white/5">
       {% for product in products %}
-      <tr class="hover:bg-cream/40 transition">
+      <tr class="hover:bg-[#161c2d] transition">
         <td class="p-4">
           <div class="flex items-center gap-3">
             {% if product.display_image %}
-            <img src="{{ product.display_image }}" class="w-12 h-14 object-cover rounded-lg border border-black/5 shrink-0" alt="{{ product.name }}">
+            <img src="{{ product.display_image }}" class="w-12 h-14 object-cover rounded-xl border border-white/10 shrink-0" alt="{{ product.name }}">
             {% else %}
-            <div class="w-12 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 shrink-0">No img</div>
+            <div class="w-12 h-14 bg-[#161c2d] rounded-xl flex items-center justify-center text-xs text-slate-500 shrink-0 border border-white/10">No img</div>
             {% endif %}
             <div>
-              <div class="font-semibold text-ink">{{ product.name }}</div>
-              <a href="{% url 'product_detail' product.slug %}" target="_blank" class="text-xs text-rose hover:underline font-mono">View on site ↗</a>
+              <div class="font-semibold text-white">{{ product.name }}</div>
+              <a href="{% url 'product_detail' product.slug %}" target="_blank" class="text-xs text-red-400 hover:underline font-mono">View on site ↗</a>
             </div>
           </div>
         </td>
         <td class="p-4">
           {% if product.category %}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-gray-800">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#161c2d] border border-white/10 text-slate-200">
             {{ product.category.name }}
           </span>
           {% else %}
-          <span class="text-gray-400 text-xs italic">Uncategorized</span>
+          <span class="text-slate-500 text-xs italic">Uncategorized</span>
           {% endif %}
         </td>
-        <td class="p-4 font-medium">
-          <div>₹{{ product.price_with_gst|floatformat:0 }}</div>
-          <span class="text-[11px] text-gray-400">Base ₹{{ product.price|floatformat:0 }} ({{ product.gst_rate }}% GST)</span>
+        <td class="p-4 font-semibold text-white">
+          ₹{{ product.price|floatformat:2 }}
         </td>
         <td class="p-4">
           {% if product.stock == 0 %}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Out of Stock</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/60 text-red-400 border border-red-500/30">Out of Stock</span>
           {% elif product.stock <= 5 %}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Low ({{ product.stock }})</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-500/30">Low ({{ product.stock }})</span>
           {% else %}
-          <span class="text-gray-700">{{ product.stock }} units</span>
+          <span class="text-slate-300 font-medium">{{ product.stock }} units</span>
           {% endif %}
         </td>
         <td class="p-4 space-x-1">
-          {% if product.featured %}<span class="text-[10px] bg-rose/10 text-rose px-2 py-0.5 rounded font-medium">Featured</span>{% endif %}
-          {% if product.is_new %}<span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">New</span>{% endif %}
+          {% if product.featured %}<span class="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded font-medium">Featured</span>{% endif %}
+          {% if product.is_new %}<span class="text-[10px] bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-medium">New</span>{% endif %}
         </td>
         <td class="p-4 text-right space-x-3 whitespace-nowrap">
-          <a class="text-xs font-semibold text-ink hover:text-rose underline" href="{% url 'owner_product_edit' product.id %}">Edit</a>
+          <a class="text-xs font-bold text-red-400 hover:text-red-300 underline" href="{% url 'owner_product_edit' product.id %}">Edit</a>
           <form method="post" action="{% url 'owner_product_delete' product.id %}" class="inline-block" onsubmit="return confirm('Are you sure you want to permanently delete \'{{ product.name|escapejs }}\'?');">
             {% csrf_token %}
-            <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-800 underline">Delete</button>
+            <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-400 underline">Delete</button>
           </form>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="6" class="p-10 text-center text-gray-400">No products found. Click "+ Add Product" to add your first item.</td>
+        <td colspan="6" class="p-10 text-center text-slate-400">No products found. Click "+ Add Product" to add your first item.</td>
       </tr>
       {% endfor %}
     </tbody>

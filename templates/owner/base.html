@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="min-h-screen bg-[#faf9f7]">
+<div class="min-h-screen bg-[#080b11] text-slate-100">
   <div class="max-w-7xl mx-auto px-5 py-8">
     <div class="flex gap-6">
       <aside class="hidden lg:block w-64 shrink-0">
-        <div class="sticky top-28 bg-white border border-black/5 rounded-3xl p-5 shadow-sm space-y-1">
-          <div class="display text-2xl px-3 pb-3">Closet 24<span class="text-rose">.</span></div>
-          <p class="text-[10px] uppercase tracking-widest text-gray-400 px-3 mb-2 font-semibold">Store Management</p>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_dashboard' %}"><span>🏠</span> Dashboard</a>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_products' %}"><span>👗</span> Products</a>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_categories' %}"><span>🏷️</span> Categories</a>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_orders' %}"><span>🧾</span> Orders</a>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_customers' %}"><span>👥</span> Customers & Roles</a>
-          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-cream transition" href="{% url 'owner_settings' %}"><span>💳</span> Payment Settings</a>
+        <div class="sticky top-28 bg-[#111622] border border-white/10 rounded-3xl p-5 shadow-2xl space-y-1">
+          <div class="display text-xl font-bold px-3 pb-2 text-white">Follow Me<span class="text-red-500">.</span></div>
+          <p class="text-[10px] uppercase tracking-widest text-slate-400 px-3 mb-2 font-semibold">Store Management</p>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_dashboard' %}"><span>🏠</span> Dashboard</a>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_products' %}"><span>👕</span> Products</a>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_categories' %}"><span>🏷️</span> Categories</a>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_orders' %}"><span>🧾</span> Orders</a>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_customers' %}"><span>👥</span> Customers & Roles</a>
+          <a class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'owner_settings' %}"><span>💳</span> Payment Settings</a>
           
-          <div class="border-t border-black/5 mt-4 pt-4 space-y-1">
-            <p class="text-[10px] uppercase tracking-widest text-gray-400 px-3 mb-2 font-semibold">Advanced Admin</p>
-            <a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-rose bg-rose/5 hover:bg-rose/10 transition" href="/admin/" target="_blank">
+          <div class="border-t border-white/10 mt-4 pt-4 space-y-1">
+            <p class="text-[10px] uppercase tracking-widest text-slate-400 px-3 mb-2 font-semibold">Advanced Admin</p>
+            <a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition" href="/admin/" target="_blank">
               <span>⚙️ Django Admin</span>
               <span>↗</span>
             </a>
-            <a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-gray-600 hover:bg-cream transition" href="{% url 'home' %}">
+            <a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-slate-400 hover:bg-[#161c2d] hover:text-white transition" href="{% url 'home' %}">
               <span>↗ View Storefront</span>
             </a>
           </div>
@@ -28,14 +28,14 @@
       </aside>
 
       <section class="flex-1 min-w-0">
-        <div class="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-5 text-sm">
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_dashboard' %}">Dashboard</a>
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_products' %}">Products</a>
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_categories' %}">Categories</a>
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_orders' %}">Orders</a>
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_customers' %}">Customers</a>
-          <a class="bg-white border rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_settings' %}">Payment</a>
-          <a class="bg-rose/10 text-rose border border-rose/20 rounded-xl px-4 py-2 whitespace-nowrap font-medium" href="/admin/" target="_blank">⚙️ Django Admin ↗</a>
+        <div class="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-5 text-sm scrollbar-none">
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_dashboard' %}">Dashboard</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_products' %}">Products</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_categories' %}">Categories</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_orders' %}">Orders</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_customers' %}">Customers</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_settings' %}">Payment</a>
+          <a class="bg-red-500/15 text-red-400 border border-red-500/30 rounded-xl px-4 py-2 whitespace-nowrap font-medium" href="/admin/" target="_blank">⚙️ Django Admin ↗</a>
         </div>
         {% block owner_content %}{% endblock %}
       </section>

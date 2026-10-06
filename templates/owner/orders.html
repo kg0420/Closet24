@@ -1,1 +1,30 @@
-{% extends "owner/base.html" %}{% block title %}Orders — FOLLOW ME{% endblock %}{% block owner_content %}<p class="uppercase tracking-widest text-xs text-rose">Sales</p><h1 class="display text-4xl mt-2">Orders</h1><p class="text-gray-500 mt-2">Open an order to update its status.</p><div class="bg-white border rounded-3xl mt-7 divide-y">{% for order in orders %}<a href="{% url 'owner_order_detail' order.id %}" class="block p-5 hover:bg-cream"><div class="flex justify-between"><span><b>#{{ order.id }} · {{ order.full_name }}</b><small class="block text-gray-400">{{ order.created_at|date:"d M Y, h:i A" }}</small></span><span class="text-right"><b>₹{{ order.total|floatformat:0 }}</b><small class="block text-gray-500">{{ order.status }}</small></span></div></a>{% empty %}<p class="p-10 text-center text-gray-400">No orders yet.</p>{% endfor %}</div>{% endblock %}
+{% extends "owner/base.html" %}
+{% block title %}Orders — Follow Me Boutique{% endblock %}
+{% block owner_content %}
+<div class="border-b border-white/10 pb-6 mb-7">
+  <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Sales & Fulfillment</p>
+  <h1 class="display text-4xl mt-2 text-white">Orders</h1>
+  <p class="text-slate-400 mt-1.5 text-sm">Click any order to view customer details, verify payment, and fulfill status.</p>
+</div>
+
+<div class="bg-[#111622] border border-white/10 rounded-3xl overflow-hidden shadow-2xl divide-y divide-white/5">
+  {% for order in orders %}
+  <a href="{% url 'owner_order_detail' order.id %}" class="block p-5 hover:bg-[#161c2d] transition">
+    <div class="flex justify-between items-center">
+      <div>
+        <b class="text-white text-base">#{{ order.id }} · {{ order.full_name }}</b>
+        <span class="block text-xs text-slate-400 mt-0.5">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+      </div>
+      <div class="text-right">
+        <b class="text-white text-base block">₹{{ order.total|floatformat:0 }}</b>
+        <span class="inline-block text-[11px] px-2.5 py-0.5 rounded-full font-semibold mt-1 {% if order.payment_status == 'Paid' %}bg-emerald-950/60 text-emerald-400 border border-emerald-500/30{% else %}bg-amber-950/60 text-amber-400 border border-amber-500/30{% endif %}">
+          {{ order.status }} • {{ order.payment_status }}
+        </span>
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <p class="p-10 text-center text-slate-400">No orders placed yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

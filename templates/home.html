@@ -1,101 +1,269 @@
 {% extends "base.html" %}
-{% block title %}Closet 24 — Everyday Style, Elevated{% endblock %}
+{% block title %}Follow Me Boutique — Premium Men's Wear & Adult Fashion{% endblock %}
 {% block content %}
 
-<section class="relative overflow-hidden bg-cream grain">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-14 lg:py-20 grid lg:grid-cols-2 gap-12 items-center min-h-[680px]">
-        <div class="max-w-xl">
-            <p class="uppercase tracking-[.35em] text-xs font-semibold text-rose mb-6">New season · 2026</p>
-            <h1 class="display text-6xl sm:text-7xl lg:text-8xl leading-[.9] tracking-tight">Dress<br><span class="italic">your</span><br>moment.</h1>
-            <p class="mt-7 text-gray-600 leading-7 max-w-md">Casual silhouettes, easy layers and statement pieces curated for the way you actually live.</p>
-            <div class="mt-9 flex flex-wrap gap-3">
-                <a href="{% url 'shop' %}" class="bg-ink text-white rounded-full px-7 py-3.5 text-sm font-semibold hover:-translate-y-0.5 transition">Shop the collection →</a>
-                <a href="#about" class="border border-black/15 rounded-full px-7 py-3.5 text-sm font-semibold hover:bg-white transition">Our story</a>
+<!-- HERO SECTION: High Visual Impact with Floating Badges & Animations -->
+<section class="relative overflow-hidden bg-gradient-to-b from-[#080b11] via-[#0d121c] to-[#080b11] border-b border-white/10">
+    <!-- Background Radiant Glow Orbs (Deep Crimson & Ruby) -->
+    <div class="absolute top-10 left-1/4 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none -z-0"></div>
+    <div class="absolute bottom-10 right-1/4 w-96 h-96 bg-rose-900/20 rounded-full blur-3xl pointer-events-none -z-0"></div>
+
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-2 gap-14 items-center min-h-[720px] relative z-10">
+        
+        <!-- Left: Headline & Actions -->
+        <div class="max-w-xl space-y-6">
+            <!-- Pulsing New Season Badge -->
+            <div class="inline-flex items-center gap-2 bg-[#111622]/90 border border-red-500/30 px-4 py-1.5 rounded-full shadow-lg shadow-red-950/40">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                <span class="w-2 h-2 rounded-full bg-red-500 -ml-4"></span>
+                <span class="text-xs font-bold tracking-widest uppercase text-red-400">Men's Adult Drop · 2026</span>
+                <span class="text-xs">✨</span>
             </div>
-            <div class="mt-12 flex gap-10 text-xs uppercase tracking-[.18em] text-gray-500">
-                <span>Curated fits</span><span>Easy returns</span><span>Local love</span>
+
+            <!-- Big Display Headline -->
+            <h1 class="display text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.02] tracking-tight text-white">
+                Elevate your style.<br>
+                <span class="italic font-normal gradient-text">Effortlessly.</span>
+            </h1>
+
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-lg">
+                Thoughtfully curated fits designed for modern adult men. Discover effortless denim jeans, relaxed oversized shirts, and stylish baggy fits crafted for your daily presence.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 flex flex-wrap gap-4 items-center">
+                <a href="{% url 'shop' %}" class="group relative inline-flex items-center gap-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white px-8 py-4 rounded-full text-sm font-bold shadow-xl shadow-red-600/35 hover:shadow-red-600/50 hover:-translate-y-0.5 transition-all duration-200">
+                    <span>Shop Men's Styles</span>
+                    <span class="text-base group-hover:translate-x-1 transition-transform">🛍️</span>
+                </a>
+                <a href="{% url 'shop' %}?q=jeans" class="inline-flex items-center gap-2 bg-[#111622] border border-white/20 hover:border-red-500 text-white px-6 py-4 rounded-full text-sm font-semibold hover:bg-[#171f30] transition-all duration-200 shadow-md">
+                    <span>Explore Jeans</span>
+                    <span>👖</span>
+                </a>
+            </div>
+
+            <!-- Floating Highlights Strip -->
+            <div class="pt-6 grid grid-cols-3 gap-4 border-t border-white/10 text-xs">
+                <div>
+                    <p class="font-extrabold text-white text-base">100%</p>
+                    <p class="text-slate-400 font-medium">Adult Men's Fits ✨</p>
+                </div>
+                <div>
+                    <p class="font-extrabold text-white text-base">1-Click</p>
+                    <p class="text-slate-400 font-medium">Instant UPI QR ⚡</p>
+                </div>
+                <div>
+                    <p class="font-extrabold text-white text-base">4.9 ★</p>
+                    <p class="text-slate-400 font-medium">Customer Love 💖</p>
+                </div>
             </div>
         </div>
-        <div class="relative">
-            <div class="aspect-[4/5] rounded-[2rem] overflow-hidden bg-sand">
-                <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85" class="w-full h-full object-cover" alt="Fashion collection">
+
+        <!-- Right: Animated Image Gallery with Interactive Floating Badges -->
+        <div class="relative lg:pl-6">
+            <!-- Hero Photo Container -->
+            <div class="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-[#0d121c] shadow-2xl shadow-red-950/30 border-4 border-white/10 group">
+                <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=1200&q=85" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Follow Me Boutique Men's Fashion">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80"></div>
+                
+                <!-- Bottom Caption inside photo -->
+                <div class="absolute bottom-6 left-6 right-6 text-white">
+                    <span class="text-[10px] uppercase font-bold tracking-[.25em] text-red-400">Editor's Signature Pick</span>
+                    <p class="display text-2xl font-bold mt-1 text-white">Sharp. Everyday. Masculine.</p>
+                </div>
             </div>
-            <div class="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl p-5 max-w-[220px]">
-                <p class="text-xs uppercase tracking-widest text-gray-400">Editor's pick</p>
-                <p class="display text-xl mt-1">Effortless. Everyday.</p>
+
+            <!-- Floating Sticker 1: Jeans Badge (Top Right) -->
+            <div class="animate-float absolute -top-4 -right-4 sm:right-2 bg-[#111622]/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/15 flex items-center gap-3 select-none">
+                <div class="w-10 h-10 rounded-xl bg-blue-950/60 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xl">
+                    👖
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white">Premium Denim</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Stretch & Relaxed Fits</p>
+                </div>
+            </div>
+
+            <!-- Floating Sticker 2: Shirts & Polos (Bottom Left) -->
+            <div class="animate-float absolute -bottom-6 -left-4 sm:left-2 bg-[#111622]/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/15 flex items-center gap-3 select-none" style="animation-delay: 1.5s;">
+                <div class="w-10 h-10 rounded-xl bg-red-950/60 border border-red-500/30 text-red-400 flex items-center justify-center text-xl">
+                    👕
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white">Artisanal Shirts</p>
+                    <p class="text-[10px] text-slate-400 font-medium">100% Breathable Cotton</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
-    <div class="flex items-end justify-between mb-8">
-        <div>
-            <p class="uppercase tracking-[.25em] text-xs text-rose">Shop the edit</p>
-            <h2 class="display text-4xl mt-2">Featured pieces</h2>
-        </div>
-        <a href="{% url 'shop' %}" class="text-sm underline underline-offset-4">View all</a>
+<!-- QUICK CATEGORY PILLS BAR -->
+<section class="max-w-7xl mx-auto px-5 lg:px-8 -mt-6 relative z-20">
+    <div class="bg-[#111622] rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
+        <a href="{% url 'shop' %}" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-500 hover:to-rose-500 transition duration-200 shrink-0 font-semibold text-xs shadow-md shadow-red-600/30">
+            <span>✨</span> All Menswear
+        </a>
+        <a href="{% url 'shop' %}?q=jeans" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-[#161c2d] hover:bg-red-600 hover:text-white border border-white/5 transition duration-200 shrink-0 font-semibold text-xs text-slate-200">
+            <span>👖</span> Jeans & Denim
+        </a>
+        <a href="{% url 'shop' %}?q=shirt" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-[#161c2d] hover:bg-red-600 hover:text-white border border-white/5 transition duration-200 shrink-0 font-semibold text-xs text-slate-200">
+            <span>👕</span> Shirts & Polos
+        </a>
+        <a href="{% url 'shop' %}?q=baggy" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-[#161c2d] hover:bg-red-600 hover:text-white border border-white/5 transition duration-200 shrink-0 font-semibold text-xs text-slate-200">
+            <span>👖</span> Baggy Fits
+        </a>
+        <a href="{% url 'shop' %}?sort=newest" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-[#161c2d] hover:bg-red-600 hover:text-white border border-white/5 transition duration-200 shrink-0 font-semibold text-xs text-slate-200">
+            <span>🔥</span> Hot New In
+        </a>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
+</section>
+
+<!-- FEATURED PRODUCTS SECTION -->
+<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div>
+            <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400">Curated Spotlight</p>
+            <h2 class="display text-4xl sm:text-5xl font-bold mt-2 text-white">Featured pieces.</h2>
+        </div>
+        <a href="{% url 'shop' %}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-red-400 transition border-b-2 border-slate-700 pb-0.5 hover:border-red-400">
+            <span>View All Styles</span>
+            <span>→</span>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {% for product in featured %}
             {% include "partials/product_card.html" with product=product %}
         {% empty %}
             {% for i in "1234" %}
-            <div class="aspect-[3/4] bg-cream rounded-2xl"></div>
+            <div class="aspect-[3/4] bg-[#111622] rounded-3xl animate-pulse border border-white/5"></div>
             {% endfor %}
         {% endfor %}
     </div>
 </section>
 
-<section class="bg-ink text-white">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-            <p class="uppercase tracking-[.25em] text-xs text-white/40">The Closet 24 edit</p>
-            <h2 class="display text-5xl mt-3 leading-tight">Style that doesn't<br><span class="italic text-rose">try too hard.</span></h2>
+<!-- MID-PAGE STATEMENT BANNER (Obsidian Contrast with Red Glow) -->
+<section class="bg-gradient-to-r from-[#05070b] via-[#101625] to-[#05070b] text-white my-10 py-20 px-5 relative overflow-hidden border-y border-white/10">
+    <!-- Starry glow accents -->
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-red-900/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div class="space-y-4">
+            <span class="inline-flex items-center gap-2 text-xs uppercase tracking-[.25em] font-bold text-red-400">
+                <span>✦</span> The Philosophy
+            </span>
+            <h2 class="display text-4xl sm:text-5xl font-bold leading-tight">
+                Fashion designed to make you <br>
+                <span class="italic font-normal gradient-text">feel like yourself.</span>
+            </h2>
         </div>
-        <p class="text-white/60 leading-8 max-w-lg">We believe the best wardrobe is the one you reach for every day. Our collection brings together comfortable fabrics, wearable colours and silhouettes that move with you.</p>
+        <div class="space-y-5 text-slate-300 leading-relaxed text-sm sm:text-base">
+            <p>
+                We believe that the best wardrobe pieces are the ones you instinctively pick up every morning. We carefully select premium denim jeans 👖, comfortable breathable cotton shirts 👕, and modern menswear coordinates that move comfortably with you all day long.
+            </p>
+            <div class="pt-2">
+                <a href="{% url 'shop' %}" class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-7 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-lg shadow-red-600/30">
+                    <span>Shop Current Edit</span>
+                    <span>🛍️</span>
+                </a>
+            </div>
+        </div>
     </div>
 </section>
 
+<!-- JUST DROPPED / NEW ARRIVALS -->
 <section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
-    <div class="flex items-end justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
         <div>
-            <p class="uppercase tracking-[.25em] text-xs text-rose">Fresh arrivals</p>
-            <h2 class="display text-4xl mt-2">Just dropped</h2>
+            <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400">Fresh Season Drops</p>
+            <h2 class="display text-4xl sm:text-5xl font-bold mt-2 text-white">Just dropped.</h2>
         </div>
+        <a href="{% url 'shop' %}?sort=newest" class="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-red-400 transition border-b-2 border-slate-700 pb-0.5 hover:border-red-400">
+            <span>Explore New In</span>
+            <span>✨</span>
+        </a>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {% for product in new_arrivals %}
             {% include "partials/product_card.html" with product=product %}
         {% empty %}
-            <p class="text-gray-500 col-span-full">Add products from the owner dashboard / Django admin.</p>
+            <p class="text-slate-400 col-span-full py-12 text-center">Add products from the owner dashboard.</p>
         {% endfor %}
     </div>
 </section>
 
-<section id="about" class="bg-cream">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-20 grid lg:grid-cols-2 gap-14 items-center">
-        <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=85" class="rounded-[2rem] w-full aspect-[4/3] object-cover" alt="Boutique clothing">
-        <div>
-            <p class="uppercase tracking-[.25em] text-xs text-rose">About us</p>
-            <h2 class="display text-5xl mt-3 leading-tight">Made for your<br><span class="italic">everyday.</span></h2>
-            <p class="text-gray-600 leading-8 mt-6">Closet 24 is a casual fashion boutique concept built around personal style — not rules. From coffee runs to celebrations, find pieces you can mix, match and make your own.</p>
-            <a href="{% url 'shop' %}" class="inline-block mt-7 border-b border-ink pb-1 text-sm font-semibold">Explore the collection →</a>
+<!-- ABOUT STORY SECTION -->
+<section id="about" class="bg-[#080b11] border-y border-white/10 py-20">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-14 items-center">
+        <div class="relative">
+            <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1200&q=85" class="rounded-[2.5rem] w-full aspect-[4/3] object-cover shadow-2xl border-4 border-[#111622]" alt="Follow Me Menswear craftsmanship">
+            <div class="absolute -bottom-6 -right-6 bg-[#111622] text-white p-5 rounded-2xl shadow-2xl border border-white/15 hidden sm:block">
+                <p class="text-xs uppercase font-bold tracking-widest text-red-400">Handpicked & Verified</p>
+                <p class="display text-lg font-bold mt-0.5 text-white">Pure Quality Fabrics</p>
+            </div>
+        </div>
+        <div class="space-y-6">
+            <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400">Our Story</p>
+            <h2 class="display text-4xl sm:text-5xl font-bold leading-tight text-white">
+                Made for your<br><span class="italic font-normal gradient-text">everyday moment.</span>
+            </h2>
+            <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
+                Follow Me Boutique was born from a passion for authentic adult men's styling. Rather than overwhelming you with endless fast-fashion rows, we provide small intentional edits of denim jeans 👖, stylish shirts 👕, and elevated menswear essentials.
+            </p>
+            <div class="pt-2">
+                <a href="{% url 'shop' %}" class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-7 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition shadow-lg shadow-red-600/30">
+                    <span>Explore Our Collection</span>
+                    <span>→</span>
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
-    <div class="grid md:grid-cols-3 gap-4">
-        <div class="rounded-3xl bg-white border border-black/5 p-8">
-            <div class="text-2xl">✦</div><h3 class="display text-2xl mt-6">Curated</h3><p class="text-gray-500 text-sm leading-6 mt-2">Small, intentional edits instead of endless scrolling.</p>
+<!-- 3 BOUTIQUE PILLARS WITH EMOJIS & CARDS -->
+<section class="max-w-7xl mx-auto px-5 lg:px-8 py-24">
+    <div class="text-center max-w-xl mx-auto mb-14">
+        <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400">Why Choose Follow Me Boutique</p>
+        <h2 class="display text-4xl font-bold mt-2 text-white">Boutique Standards.</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-[#111622] rounded-3xl p-8 border border-white/10 shadow-lg hover:border-red-500/50 hover:shadow-2xl hover:shadow-red-600/15 hover:-translate-y-1.5 transition-all duration-300 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-blue-950/60 border border-blue-500/30 text-blue-400 flex items-center justify-center text-2xl shadow-sm">
+                👖
+            </div>
+            <h3 class="display text-2xl font-bold text-white">Curated Edits</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Small, deliberate drops instead of endless scrolling. Every pair of jeans and shirt is handpicked for men's fit, durability, and comfort.
+            </p>
         </div>
-        <div class="rounded-3xl bg-white border border-black/5 p-8">
-            <div class="text-2xl">♡</div><h3 class="display text-2xl mt-6">Personal</h3><p class="text-gray-500 text-sm leading-6 mt-2">A boutique experience with real human attention.</p>
+
+        <!-- Card 2 -->
+        <div class="bg-[#111622] rounded-3xl p-8 border border-white/10 shadow-lg hover:border-red-500/50 hover:shadow-2xl hover:shadow-red-600/15 hover:-translate-y-1.5 transition-all duration-300 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-red-950/60 border border-red-500/30 text-red-400 flex items-center justify-center text-2xl shadow-sm">
+                👕
+            </div>
+            <h3 class="display text-2xl font-bold text-white">Personal Attention</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                A warm boutique experience with human attention. Message us on WhatsApp or Instagram for sizing help and styling advice.
+            </p>
         </div>
-        <div class="rounded-3xl bg-white border border-black/5 p-8">
-            <div class="text-2xl">↗</div><h3 class="display text-2xl mt-6">Easy</h3><p class="text-gray-500 text-sm leading-6 mt-2">Browse, add to bag and send your order without the friction.</p>
+
+        <!-- Card 3 -->
+        <div class="bg-[#111622] rounded-3xl p-8 border border-white/10 shadow-lg hover:border-red-500/50 hover:shadow-2xl hover:shadow-red-600/15 hover:-translate-y-1.5 transition-all duration-300 space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl shadow-sm">
+                ⚡
+            </div>
+            <h3 class="display text-2xl font-bold text-white">1-Click Fast Pay</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Scan and pay instantly using Google Pay, PhonePe, or Paytm with automatic order tracking and fast local store pickup.
+            </p>
         </div>
     </div>
 </section>
+
 {% endblock %}

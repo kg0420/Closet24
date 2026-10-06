@@ -1,67 +1,54 @@
 {% extends "owner/base.html" %}
-{% block title %}Order #{{ order.id }} — Closet 24{% endblock %}
+{% block title %}Order #{{ order.id }} — Follow Me Boutique{% endblock %}
 {% block owner_content %}
-<a href="{% url 'owner_orders' %}" class="underline text-sm">← Back to Orders</a>
+<a href="{% url 'owner_orders' %}" class="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-white font-medium">← Back to Orders</a>
 
 <div class="grid lg:grid-cols-2 gap-6 mt-5">
-    <div class="bg-white border rounded-3xl p-7">
-        <p class="text-xs uppercase tracking-widest text-gray-400">Order Details</p>
-        <h1 class="display text-4xl mt-2">#{{ order.id }}</h1>
+    <div class="bg-[#111622] border border-white/10 rounded-3xl p-7 shadow-2xl">
+        <p class="text-xs uppercase tracking-widest text-red-400 font-bold">Order Details</p>
+        <h1 class="display text-4xl mt-2 text-white">#{{ order.id }}</h1>
 
         <!-- Customer & Delivery Info -->
-        <div class="bg-cream rounded-2xl p-5 mt-6 text-sm leading-7">
+        <div class="bg-[#161c2d] border border-white/10 rounded-2xl p-5 mt-6 text-sm leading-7 text-slate-200">
             <div class="flex justify-between items-center mb-2">
-                <b class="text-base">{{ order.full_name }}</b>
-                {% if order.fulfillment_type == 'pickup' %}
-                    <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">🏬 Store Pickup</span>
-                {% else %}
-                    <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">🚚 Home Delivery</span>
-                {% endif %}
+                <b class="text-base text-white">{{ order.full_name }}</b>
+                <span class="bg-amber-950/60 text-amber-400 border border-amber-500/30 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">🚚 Delivery</span>
             </div>
             <b>Phone:</b> {{ order.phone }}<br>
-            {% if order.fulfillment_type == 'pickup' %}
-                <p class="text-gray-600 mt-1 italic">Customer will pick up items in store.</p>
-            {% else %}
-                <b>Delivery Address:</b><br>
-                {{ order.address }}<br>
-                {{ order.city }}, {{ order.state }} - {{ order.pincode }}
-            {% endif %}
+            <b>Delivery Address:</b><br>
+            {{ order.address }}<br>
+            {{ order.city }}, {{ order.state }} - {{ order.pincode }}
         </div>
         
         <!-- Order Items -->
-        <h2 class="display text-2xl mt-7 mb-3">Items</h2>
-        <div class="divide-y">
+        <h2 class="display text-2xl mt-7 mb-3 text-white">Items</h2>
+        <div class="divide-y divide-white/5">
             {% for item in order.items.all %}
-            <div class="py-3 flex justify-between text-sm">
+            <div class="py-3 flex justify-between text-sm text-slate-300">
                 <span>{{ item.product.name }} {% if item.size %}({{ item.size }}){% endif %} × {{ item.quantity }}</span>
-                <b>₹{{ item.subtotal|floatformat:2 }}</b>
+                <b class="text-white">₹{{ item.subtotal|floatformat:2 }}</b>
             </div>
             {% endfor %}
         </div>
 
-        <!-- GST & Financial Breakdown -->
-        <div class="mt-6 p-4 bg-cream rounded-2xl text-sm space-y-1">
+        <!-- Financial Breakdown -->
+        <div class="mt-6 p-4 bg-[#161c2d] border border-white/10 rounded-2xl text-sm space-y-1 text-slate-300">
             <p><b>Subtotal:</b> ₹{{ order.subtotal|floatformat:2 }}</p>
-            {% if order.cgst > 0 %}
-                <p><b>CGST:</b> ₹{{ order.cgst|floatformat:2 }} | <b>SGST:</b> ₹{{ order.sgst|floatformat:2 }}</p>
-            {% else %}
-                <p><b>IGST:</b> ₹{{ order.igst|floatformat:2 }}</p>
-            {% endif %}
-            <p class="font-bold text-base pt-1 border-t border-black/10">Total: ₹{{ order.total|floatformat:2 }}</p>
-            <p class="text-xs text-gray-500 pt-1"><b>UTR / Payment Ref:</b> {{ order.payment_reference|default:"Not submitted yet" }}</p>
+            <p class="font-bold text-base pt-1 border-t border-white/10 text-white">Total: ₹{{ order.total|floatformat:2 }}</p>
+            <p class="text-xs text-slate-400 pt-1"><b>UTR / Payment Ref:</b> <span class="font-mono text-white">{{ order.payment_reference|default:"Not submitted yet" }}</span></p>
         </div>
     </div>
 
     <!-- Status Update Panel -->
-    <div class="bg-white border rounded-3xl p-7 h-fit">
-        <h2 class="display text-2xl">Update Order</h2>
-        <p class="text-sm text-gray-500 mt-1">Payment Status: <b class="text-ink">{{ order.payment_status }}</b></p>
+    <div class="bg-[#111622] border border-white/10 rounded-3xl p-7 h-fit shadow-2xl">
+        <h2 class="display text-2xl text-white">Update Order</h2>
+        <p class="text-sm text-slate-400 mt-1">Payment Status: <b class="text-white">{{ order.payment_status }}</b></p>
 
         <form method="post" class="mt-6 space-y-4">
             {% csrf_token %}
             <div>
-                <label class="text-xs uppercase tracking-widest text-gray-500">Order Fulfillment Status</label>
-                <select name="status" class="w-full border rounded-xl p-3 mt-1 text-sm bg-white">
+                <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Order Fulfillment Status</label>
+                <select name="status" class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500">
                     {% for code, label in order.STATUS_CHOICES %}
                     <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -69,36 +56,38 @@
             </div>
 
             <div>
-                <label class="text-xs uppercase tracking-widest text-gray-500">Payment Status</label>
-                <select name="payment_status" class="w-full border rounded-xl p-3 mt-1 text-sm bg-white">
+                <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Payment Status</label>
+                <select name="payment_status" class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500">
                     <option value="Pending" {% if order.payment_status == "Pending" %}selected{% endif %}>Pending</option>
-                    <option value="Submitted / Under Verification" {% if order.payment_status == "Submitted / Under Verification" %}selected{% endif%}>Submitted / Under Verification</option>
+                    <option value="Submitted / Under Verification" {% if order.payment_status == "Submitted / Under Verification" %}selected{% endif %}>Submitted / Under Verification</option>
                     <option value="Paid" {% if order.payment_status == "Paid" %}selected{% endif %}>Paid</option>
                     <option value="Failed" {% if order.payment_status == "Failed" %}selected{% endif %}>Failed</option>
                 </select>
             </div>
 
-            <button type="submit" class="w-full bg-ink text-white rounded-full py-3.5 font-medium hover:bg-black transition">Save Changes</button>
+            <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full py-3.5 font-bold text-sm shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
+                Save Order Changes
+            </button>
         </form>
 
-        <div class="mt-6 pt-5 border-t space-y-3">
+        <div class="mt-6 pt-5 border-t border-white/10 space-y-3">
             {% if order.payment_status == "Paid" %}
-            <a href="{% url 'download_receipt' order.id %}" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-3 rounded-full font-semibold transition shadow-sm">
+            <a href="{% url 'download_receipt' order.id %}" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-3 rounded-full font-semibold transition shadow-md">
                 📄 View / Print Official Tax Invoice
             </a>
             {% else %}
-            <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 space-y-2">
+            <div class="p-3 bg-amber-950/40 border border-amber-500/30 rounded-2xl text-xs text-amber-300 space-y-1">
                 <p><b>🔒 Invoice Locked:</b> Payment is currently <b>{{ order.payment_status }}</b>. Invoices are generated only after payment is verified and saved as <b>Paid</b> above.</p>
             </div>
             {% endif %}
 
             <form method="post" action="{% url 'owner_order_delete' order.id %}" onsubmit="return confirm('Are you sure you want to delete Order #{{ order.id }}? This cannot be undone.');">
                 {% csrf_token %}
-                <button type="submit" class="w-full text-center text-red-600 hover:text-red-800 text-xs py-2 hover:underline font-medium">
+                <button type="submit" class="w-full text-center text-red-400 hover:text-red-300 text-xs py-2 hover:underline font-semibold">
                     🗑️ Delete This Order
                 </button>
             </form>
-            <div class="text-xs text-gray-500 text-center">
+            <div class="text-xs text-slate-500 text-center">
                 <b>Google Pay / UPI:</b> Verify the payment with UTR reference before dispatching.
             </div>
         </div>

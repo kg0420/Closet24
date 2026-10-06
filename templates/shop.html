@@ -1,36 +1,71 @@
 {% extends "base.html" %}
-{% block title %}Shop — Closet 24{% endblock %}
+{% block title %}Men's Collection — Follow Me Boutique{% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto px-5 lg:px-8 py-12">
+    <!-- Header & Search Toolbar -->
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
         <div>
-            <p class="uppercase tracking-[.25em] text-xs text-rose">The collection</p>
-            <h1 class="display text-5xl mt-2">Shop everything.</h1>
+            <div class="inline-flex items-center gap-2 text-xs font-bold tracking-[.25em] uppercase text-red-400 mb-1">
+                <span>✨</span> The Follow Me Edit
+            </div>
+            <h1 class="display text-4xl sm:text-5xl font-bold text-white">Men's collection.</h1>
+            <p class="text-slate-400 text-sm mt-1">Curated men's jeans, casual shirts, baggy fits, and menswear staples.</p>
         </div>
-        <form class="flex gap-2" method="get">
-            <input name="q" value="{{ query }}" placeholder="Search styles..." class="w-56 border border-black/10 rounded-full px-5 py-3 text-sm outline-none focus:border-ink">
-            <select name="sort" onchange="this.form.submit()" class="border border-black/10 rounded-full px-4 py-3 text-sm bg-white">
-                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
-                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low</option>
-                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High</option>
+
+        <!-- Search & Sort Controls -->
+        <form class="flex flex-wrap sm:flex-nowrap gap-2.5 items-center" method="get">
+            {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+            <div class="relative w-full sm:w-64">
+                <input name="q" value="{{ query }}" placeholder="Search jeans, shirts, baggy..." 
+                       class="w-full bg-[#111622] text-white border border-white/15 rounded-full pl-10 pr-4 py-3 text-xs outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/25 transition shadow-sm placeholder:text-slate-500">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
+            </div>
+            <select name="sort" onchange="this.form.submit()" 
+                    class="bg-[#111622] text-slate-200 border border-white/15 rounded-full px-4 py-3 text-xs font-semibold outline-none focus:border-red-500 cursor-pointer shadow-sm">
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>✨ Newest Arrivals</option>
+                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>💰 Price: Low to High</option>
+                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>💎 Price: High to Low</option>
             </select>
         </form>
     </div>
 
-    <div class="flex gap-2 overflow-x-auto pb-3 mb-8">
-        <a href="{% url 'shop' %}" class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-semibold {% if not active_category %}bg-ink text-white{% else %}bg-cream{% endif %}">All</a>
+    <!-- Category Pill Strip with Emojis -->
+    <div class="flex gap-2.5 overflow-x-auto pb-4 mb-10 scrollbar-none">
+        <a href="{% url 'shop' %}{% if query or sort %}?{% if query %}q={{ query|urlencode }}&{% endif %}{% if sort %}sort={{ sort }}{% endif %}{% endif %}" 
+           class="whitespace-nowrap rounded-2xl px-5 py-2.5 text-xs font-bold transition-all duration-200 shadow-sm flex items-center gap-2 {% if not active_category %}bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/30{% else %}bg-[#111622] border border-white/10 text-slate-300 hover:border-red-500/50 hover:text-white{% endif %}">
+            <span>✨</span> All Menswear
+        </a>
         {% for category in categories %}
-            <a href="?category={{ category.slug }}" class="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-semibold {% if active_category == category.slug %}bg-ink text-white{% else %}bg-cream{% endif %}">{{ category.name }}</a>
+            <a href="?category={{ category.slug }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+               class="whitespace-nowrap rounded-2xl px-5 py-2.5 text-xs font-bold transition-all duration-200 shadow-sm flex items-center gap-2 {% if active_category == category.slug %}bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/30{% else %}bg-[#111622] border border-white/10 text-slate-300 hover:border-red-500/50 hover:text-white{% endif %}">
+                {% if "jean" in category.name|lower or "denim" in category.name|lower or "bottom" in category.name|lower or "baggy" in category.name|lower %}
+                    <span>👖</span>
+                {% elif "shirt" in category.name|lower or "tee" in category.name|lower or "polo" in category.name|lower %}
+                    <span>👕</span>
+                {% elif "jacket" in category.name|lower or "blazer" in category.name|lower or "coat" in category.name|lower %}
+                    <span>🧥</span>
+                {% elif "trouser" in category.name|lower or "pant" in category.name|lower or "formal" in category.name|lower or "chino" in category.name|lower %}
+                    <span>👔</span>
+                {% else %}
+                    <span>✨</span>
+                {% endif %}
+                <span>{{ category.name }}</span>
+            </a>
         {% endfor %}
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12">
+    <!-- Product Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {% for product in products %}
             {% include "partials/product_card.html" with product=product %}
         {% empty %}
-            <div class="col-span-full py-24 text-center">
-                <p class="display text-3xl">No pieces found.</p>
-                <p class="text-gray-500 mt-2">Try another search or category.</p>
+            <div class="col-span-full py-28 text-center bg-[#111622] rounded-3xl border border-white/10 shadow-xl">
+                <span class="text-5xl block mb-3">🛍️</span>
+                <p class="display text-3xl font-bold text-white">No matching pieces found.</p>
+                <p class="text-slate-400 text-sm mt-2 max-w-sm mx-auto">Try clearing your search query or selecting a different menswear category.</p>
+                <a href="{% url 'shop' %}" class="inline-block mt-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-7 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition shadow-lg shadow-red-600/30">
+                    Reset All Filters
+                </a>
             </div>
         {% endfor %}
     </div>

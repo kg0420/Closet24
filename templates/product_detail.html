@@ -1,41 +1,41 @@
 {% extends "base.html" %}
-{% block title %}{{ product.name }} — Closet 24{% endblock %}
+{% block title %}{{ product.name }} — Follow Me Boutique{% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto px-5 lg:px-8 py-10">
     <div class="grid lg:grid-cols-2 gap-12">
         <!-- Product Image Gallery -->
         <div class="space-y-4">
             <!-- Main Featured Image Container -->
-            <div class="relative aspect-[4/5] bg-cream rounded-[2rem] overflow-hidden group shadow-sm">
+            <div class="relative aspect-[4/5] bg-[#0d121c] border border-white/10 rounded-[2rem] overflow-hidden group shadow-2xl">
                 {% if product.all_images %}
                     <img id="mainProductImage" src="{{ product.all_images.0 }}" alt="{{ product.name }}" class="w-full h-full object-cover transition-opacity duration-300">
                     
                     {% if product.all_images|length > 1 %}
                     <!-- Prev / Next Controls -->
-                    <button type="button" onclick="changeImage(-1)" aria-label="Previous photo" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-ink shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                    <button type="button" onclick="changeImage(-1)" aria-label="Previous photo" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 hover:bg-black text-white shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 border border-white/15">
                         ❮
                     </button>
-                    <button type="button" onclick="changeImage(1)" aria-label="Next photo" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-ink shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                    <button type="button" onclick="changeImage(1)" aria-label="Next photo" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 hover:bg-black text-white shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 border border-white/15">
                         ❯
                     </button>
                     
                     <!-- Counter Badge -->
-                    <span id="imageCounter" class="absolute bottom-4 right-4 bg-black/60 backdrop-blur text-white text-[11px] font-semibold px-3 py-1 rounded-full pointer-events-none">
+                    <span id="imageCounter" class="absolute bottom-4 right-4 bg-black/80 backdrop-blur text-white text-[11px] font-semibold px-3 py-1 rounded-full pointer-events-none border border-white/10">
                         1 / {{ product.all_images|length }}
                     </span>
                     {% endif %}
                 {% else %}
-                    <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                        <span class="text-4xl mb-2">👗</span>
+                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-500">
+                        <span class="text-4xl mb-2">👕</span>
                         <p class="text-sm">No photo available</p>
                     </div>
                 {% endif %}
 
                 {% if product.is_new %}
-                <span class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">New</span>
+                <span class="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">New</span>
                 {% endif %}
                 {% if product.discount_percent %}
-                <span class="absolute top-4 right-4 bg-rose text-white px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">-{{ product.discount_percent }}%</span>
+                <span class="absolute top-4 right-4 bg-red-600 text-white px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold">-{{ product.discount_percent }}%</span>
                 {% endif %}
             </div>
 
@@ -44,14 +44,15 @@
             <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                 {% for img_url in product.all_images %}
                 <button type="button" onclick="selectImage({{ forloop.counter0 }}, '{{ img_url|escapejs }}')" 
-                    class="thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 {% if forloop.first %}border-rose ring-2 ring-rose/20 opacity-100{% else %}border-transparent hover:border-black/20 opacity-70 hover:opacity-100{% endif %}">
+                    class="thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 bg-[#0d121c] {% if forloop.first %}border-red-500 ring-2 ring-red-500/20 opacity-100{% else %}border-transparent hover:border-white/30 opacity-60 hover:opacity-100{% endif %}">
                     <img src="{{ img_url }}" alt="{{ product.name }} thumbnail {{ forloop.counter }}" class="w-full h-full object-cover">
                 </button>
                 {% endfor %}
             </div>
 
+            {{ product.all_images|json_script:"product-images-data" }}
             <script>
-                const productImages = {{ product.all_images|safe }};
+                const productImages = JSON.parse(document.getElementById('product-images-data').textContent || '[]');
                 let currentImageIndex = 0;
 
                 function selectImage(index, url) {
@@ -69,9 +70,9 @@
                     const thumbs = document.querySelectorAll('.thumb-btn');
                     thumbs.forEach((t, i) => {
                         if (i === index) {
-                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-rose ring-2 ring-rose/20 opacity-100';
+                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-red-500 ring-2 ring-red-500/30 opacity-100 bg-[#0d121c]';
                         } else {
-                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-transparent hover:border-black/20 opacity-70 hover:opacity-100';
+                            t.className = 'thumb-btn shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition duration-200 border-transparent hover:border-white/30 opacity-60 hover:opacity-100 bg-[#0d121c]';
                         }
                     });
                 }
@@ -84,42 +85,71 @@
             </script>
             {% endif %}
         </div>
-        <div class="lg:py-8">
-            <p class="uppercase tracking-[.25em] text-xs text-rose">{{ product.category.name|default:"FOLLOW ME" }}</p>
-            <h1 class="display text-5xl mt-3">{{ product.name }}</h1>
-            <div class="mt-5 flex items-center gap-3">
-                <span class="text-2xl font-semibold">₹{{ product.price|floatformat:0 }}</span>
-                {% if product.compare_at_price %}<span class="text-gray-400 line-through">₹{{ product.compare_at_price|floatformat:0 }}</span>{% endif %}
+
+        <!-- Product Details Column -->
+        <div class="lg:py-6">
+            <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400">{{ product.category.name|default:"FOLLOW ME" }}</p>
+            <h1 class="display text-4xl sm:text-5xl mt-2 text-white">{{ product.name }}</h1>
+            <div class="mt-4 flex items-center gap-3">
+                <span class="text-3xl font-extrabold text-white">₹{{ product.price|floatformat:0 }}</span>
+                {% if product.compare_at_price %}<span class="text-slate-500 line-through text-lg">₹{{ product.compare_at_price|floatformat:0 }}</span>{% endif %}
             </div>
-            <p class="text-gray-600 leading-7 mt-7">{{ product.description }}</p>
+            <p class="text-slate-300 leading-relaxed mt-6 text-sm sm:text-base">{{ product.description }}</p>
 
             <form action="{% url 'add_to_cart' product.id %}" method="post" class="mt-8">
                 {% csrf_token %}
-                {% if product.sizes %}
+                {% if product.size_list %}
                 <div class="mb-6">
-                    <div class="flex justify-between text-sm mb-3"><span class="font-semibold">Available sizes</span><span class="text-gray-400">Choose in store / DM</span></div>
-                    <p class="text-sm text-gray-600 bg-cream rounded-xl px-4 py-3">{{ product.sizes }}</p>
-                    <input type="hidden" name="size" value="{{ product.sizes }}">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <label class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Select Size</label>
+                        <span class="text-xs text-red-400">Standard men's fit</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5">
+                        {% for s in product.size_list %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="size" value="{{ s }}" class="sr-only peer" {% if forloop.first %}checked{% endif %}>
+                            <span class="inline-flex items-center justify-center min-w-[3.25rem] h-11 px-4 text-xs font-bold rounded-2xl border border-white/10 bg-[#111622] text-slate-200 shadow-sm transition-all duration-150 select-none hover:border-red-500/50 peer-checked:bg-gradient-to-r peer-checked:from-red-600 peer-checked:to-rose-600 peer-checked:text-white peer-checked:border-red-600 peer-checked:shadow-lg peer-checked:shadow-red-600/30">
+                                {{ s }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endif %}
                 <div class="flex gap-3">
-                    <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" class="w-24 border border-black/10 rounded-full px-5 py-3.5">
+                    <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" 
+                           class="w-24 bg-[#111622] text-white border border-white/15 rounded-full px-5 py-3.5 text-center font-bold text-sm outline-none focus:border-red-500 shadow-sm">
                     <input type="hidden" name="next" value="cart">
-                    <button class="flex-1 bg-ink text-white rounded-full py-3.5 font-semibold hover:bg-rose transition">Add to bag</button>
+                    <button class="flex-1 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full py-4 font-bold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+                        <span>Add to Bag</span>
+                        <span class="text-base">🛍️</span>
+                    </button>
                 </div>
             </form>
 
-            <div class="border-t mt-10 pt-8 grid sm:grid-cols-3 gap-5 text-xs">
-                <div><b>Quality</b><p class="text-gray-500 mt-1">Curated pieces</p></div>
-                <div><b>Pickup</b><p class="text-gray-500 mt-1">Local store pickup</p></div>
-                <div><b>Support</b><p class="text-gray-500 mt-1">DM for styling help</p></div>
+            <div class="border-t border-white/10 mt-10 pt-8 grid grid-cols-3 gap-4 text-xs">
+                <div class="bg-[#111622] p-4 rounded-2xl border border-white/10 shadow-sm">
+                    <span class="text-xl block mb-1">✨</span>
+                    <b class="text-white">Curated Quality</b>
+                    <p class="text-slate-400 mt-0.5 text-[11px]">Hand-checked pieces</p>
+                </div>
+                <div class="bg-[#111622] p-4 rounded-2xl border border-white/10 shadow-sm">
+                    <span class="text-xl block mb-1">🏬</span>
+                    <b class="text-white">Local Pickup</b>
+                    <p class="text-slate-400 mt-0.5 text-[11px]">Free store collection</p>
+                </div>
+                <div class="bg-[#111622] p-4 rounded-2xl border border-white/10 shadow-sm">
+                    <span class="text-xl block mb-1">💬</span>
+                    <b class="text-white">Styling Help</b>
+                    <p class="text-slate-400 mt-0.5 text-[11px]">DM on Instagram</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16">
-    <h2 class="display text-3xl mb-8">You may also like</h2>
+    <h2 class="display text-3xl mb-8 text-white">You may also like</h2>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {% for p in related %}{% include "partials/product_card.html" with product=p %}{% endfor %}
     </div>

@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db import transaction
+from slugify import slugify
 
 from .forms import CategoryForm, CheckoutForm, ProductForm, RegisterForm
 from .models import Category, Order, OrderItem, Product, Profile, ShopSettings, ProductImage
@@ -40,8 +42,7 @@ def shop(request):
     sort = request.GET.get("sort", "newest")
 
     if q:
-        products = products.filter(Q(name__icontains=q) |
-Q(description__icontains=q))
+        products = products.filter(Q(name__icontains=q) | Q(description__icontains=q))
     if category:
         products = products.filter(category__slug=category)
 
@@ -97,17 +98,17 @@ def cart(request):
     cart_data = _cart(request)
     items = []
     subtotal = Decimal("0")
-    total_tax = Decimal("0")
+    # total_tax = Decimal("0")
 
     for key, item in cart_data.items():
         product = Product.objects.filter(id=item["product_id"]).first()
         if not product:
             continue
         item_subtotal = product.price * item["quantity"]
-        item_tax = (item_subtotal * (product.gst_rate /Decimal("100"))).quantize(Decimal("0.01"))
+        # item_tax = (item_subtotal * (product.gst_rate /Decimal("100"))).quantize(Decimal("0.01"))
 
         subtotal += item_subtotal
-        total_tax += item_tax
+        # total_tax += item_tax
 
         items.append({
             "key": key,
@@ -116,15 +117,15 @@ def cart(request):
             "quantity": item["quantity"],
             "subtotal": item_subtotal,
             "gst_rate": product.gst_rate,
-            "gst_amount": item_tax,
-            "item_total": item_subtotal + item_tax,
+            # "gst_amount": item_tax,
+            "item_total": item_subtotal ,
         })
 
-    grand_total = subtotal + total_tax
+    grand_total = subtotal 
     return render(request, "cart.html", {
         "items": items,
         "subtotal": subtotal,
-        "total_tax": total_tax,
+        # "total_tax": total_tax,
         "total": grand_total,
     })
 
@@ -148,34 +149,35 @@ def remove_from_cart(request, key):
 
 
 def register(request):
+    next_url = request.GET.get("next") or request.POST.get("next") or "home"
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect(next_url)
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             Profile.objects.create(user=user, role="customer")
             login(request, user)
-            return redirect("home")
+            return redirect(next_url)
     else:
         form = RegisterForm()
-    return render(request, "auth/register.html", {"form": form})
+    return render(request, "auth/register.html", {"form": form, "next": next_url})
 
 
 def login_view(request):
     from django.contrib.auth import authenticate
+    next_url = request.GET.get("next") or request.POST.get("next") or "home"
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect(next_url)
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        user = authenticate(request, username=username,
-password=password)
+        user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect(request.GET.get("next", "home"))
+            return redirect(next_url)
         messages.error(request, "Invalid username or password.")
-    return render(request, "auth/login.html")
+    return render(request, "auth/login.html", {"next": next_url})
 
 
 def logout_view(request):
@@ -191,17 +193,16 @@ def checkout(request):
 
     items = []
     subtotal = Decimal("0")
-    total_tax = Decimal("0")
+    # total_tax = Decimal("0")
 
     for key, item in cart_data.items():
         product = get_object_or_404(Product, id=item["product_id"])
         item_sub = product.price * item["quantity"]
-        item_tax = (item_sub * (product.gst_rate / Decimal("100"))).quantize(Decimal("0.01"))
+        item_tax = Decimal("0.00")
         subtotal += item_sub
-        total_tax += item_tax
         items.append((key, product, item, item_sub, item_tax))
 
-    grand_total = subtotal + total_tax
+    grand_total = subtotal 
 
     if request.method == "POST":
         form = CheckoutForm(request.POST)
@@ -209,38 +210,32 @@ def checkout(request):
             order = form.save(commit=False)
             order.user = request.user
             order.subtotal = subtotal
-            order.total_tax = total_tax
+            order.total_tax = Decimal("0.00")
+            order.cgst = Decimal("0.00")
+            order.sgst = Decimal("0.00")
+            order.igst = Decimal("0.00")
             order.total = grand_total
 
-            # GST Splitting: Check state (e.g. Tamil Nadu or matchingowner state)
-            store_state = "Tamil Nadu"  # Change to your businesshome state
-            if order.state.strip().lower() == store_state.lower():
-                order.cgst = (total_tax / Decimal("2")).quantize(Decimal("0.01"))
-                order.sgst = (total_tax - order.cgst).quantize(Decimal("0.01"))
-                order.igst = Decimal("0.00")
-            else:
-                order.cgst = Decimal("0.00")
-                order.sgst = Decimal("0.00")
-                order.igst = total_tax
-
-            order.save()
-
+            # Pre-validate stock for ALL items before modifying database
             for key, product, item, item_sub, item_tax in items:
                 if product.stock < item["quantity"]:
-                    messages.error(request, f"{product.name} is nolonger available in that quantity.")
-                    order.delete()
+                    messages.error(request, f"{product.name} is no longer available in that quantity.")
                     return redirect("cart")
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    size=item.get("size", ""),
-                    quantity=item["quantity"],
-                    price=product.price,
-                    gst_rate=product.gst_rate,
-                    gst_amount=(item_tax / item["quantity"]).quantize(Decimal("0.01")),
-                )
-                product.stock -= item["quantity"]
-                product.save(update_fields=["stock"])
+
+            with transaction.atomic():
+                order.save()
+                for key, product, item, item_sub, item_tax in items:
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        size=item.get("size", ""),
+                        quantity=item["quantity"],
+                        price=product.price,
+                        gst_rate=Decimal("0.00"),
+                        gst_amount=Decimal("0.00"),
+                    )
+                    product.stock -= item["quantity"]
+                    product.save(update_fields=["stock"])
 
             request.session["cart"] = {}
             request.session.modified = True
@@ -256,7 +251,7 @@ def checkout(request):
         "form": form,
         "items": items,
         "subtotal": subtotal,
-        "total_tax": total_tax,
+        # "total_tax": total_tax,
         "total": grand_total,
     })
 
@@ -391,21 +386,44 @@ def owner_dashboard(request):
 
 @owner_required
 def owner_products(request):
+    products = Product.objects.select_related("category").all()
+    q = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "newest")
+
+    if q:
+        products = products.filter(Q(name__icontains=q) | Q(description__icontains=q))
+
+    if sort == "price_low":
+        products = products.order_by("price")
+    elif sort == "price_high":
+        products = products.order_by("-price")
+    elif sort == "stock_low":
+        products = products.order_by("stock")
+    else:
+        products = products.order_by("-created_at")
+
     return render(request, "owner/products.html", {
-        "products": Product.objects.select_related("category").all()
+        "products": products,
+        "query": q,
+        "sort": sort,
     })
 
 
 @owner_required
 def owner_product_new(request):
-    form = ProductForm(request.POST or None, request.FILES or None)
-    if request.method == "POST" and form.is_valid():
-        product = form.save()
-        # Handle multiple gallery photo uploads
-        for f in request.FILES.getlist("gallery_images"):
-            ProductImage.objects.create(product=product, image=f)
-        messages.success(request, f"Product '{product.name}' added successfully.")
-        return redirect("owner_products")
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            for f in request.FILES.getlist("gallery_images"):
+                ProductImage.objects.create(product=product, image=f)
+            messages.success(request, f"Product '{product.name}' added successfully.")
+            return redirect("owner_products")
+        else:
+            err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
+            messages.error(request, f"Could not add product. Please check: {'; '.join(err_list)}")
+    else:
+        form = ProductForm()
     return render(request, "owner/product_form.html", {
         "form": form,
         "heading": "Add a new product",
@@ -416,14 +434,39 @@ def owner_product_new(request):
 @owner_required
 def owner_product_edit(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    form = ProductForm(request.POST or None, request.FILES or None, instance=product)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        # Handle additional gallery photo uploads
-        for f in request.FILES.getlist("gallery_images"):
-            ProductImage.objects.create(product=product, image=f)
-        messages.success(request, f"Product '{product.name}' updated successfully.")
-        return redirect("owner_product_edit", product_id=product.id)
+    if request.method == "POST":
+        if request.POST.get("clear_main_image") == "1" and product.image:
+            product.image.delete(save=False)
+            product.image = None
+            product.save(update_fields=["image"])
+
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            product = form.save()
+
+            # Synchronize slug if product name was modified
+            base_slug = slugify(product.name) or "item"
+            if not product.slug or not product.slug.startswith(base_slug):
+                slug = base_slug
+                counter = 1
+                while Product.objects.filter(slug=slug).exclude(pk=product.pk).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                product.slug = slug
+                product.save(update_fields=["slug"])
+
+            # Handle additional gallery photo uploads
+            for f in request.FILES.getlist("gallery_images"):
+                ProductImage.objects.create(product=product, image=f)
+
+            messages.success(request, f"Product '{product.name}' updated successfully.")
+            return redirect("owner_products")
+        else:
+            err_list = [f"{field}: {err[0]}" for field, err in form.errors.items()]
+            messages.error(request, f"Could not update product. Please check: {'; '.join(err_list)}")
+    else:
+        form = ProductForm(instance=product)
+
     return render(request, "owner/product_form.html", {
         "form": form,
         "heading": f"Edit {product.name}",

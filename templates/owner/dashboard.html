@@ -1,74 +1,74 @@
 {% extends "owner/base.html" %}
-{% block title %}Owner Dashboard — FOLLOW ME{% endblock %}
+{% block title %}Owner Dashboard — Follow Me Boutique{% endblock %}
 {% block owner_content %}
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
   <div>
-    <p class="uppercase tracking-widest text-xs text-rose font-semibold">Store Administration & Overview</p>
-    <h1 class="display text-4xl lg:text-5xl mt-2">Welcome to your Shop Dashboard.</h1>
-    <p class="text-gray-500 mt-2">Full control of your boutique catalog, orders, customers, and administrative settings.</p>
+    <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Store Administration & Overview</p>
+    <h1 class="display text-4xl lg:text-5xl mt-2 text-white">Shop Dashboard.</h1>
+    <p class="text-slate-400 mt-1.5 text-sm">Full control of your boutique catalog, orders, customers, and administrative settings.</p>
   </div>
   <div class="flex items-center gap-3">
-    <a href="/admin/" target="_blank" class="border border-rose/30 bg-rose/5 text-rose rounded-full px-5 py-3 text-sm font-semibold hover:bg-rose/10 transition">⚙️ Open Django Admin ↗</a>
-    <a href="{% url 'owner_product_new' %}" class="bg-ink text-white rounded-full px-6 py-3 text-sm font-medium hover:bg-black/80 transition">+ Add Product</a>
+    <a href="/admin/" target="_blank" class="border border-red-500/30 bg-red-500/10 text-red-400 rounded-full px-5 py-3 text-sm font-semibold hover:bg-red-500/20 transition">⚙️ Django Admin ↗</a>
+    <a href="{% url 'owner_product_new' %}" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-6 py-3 text-sm font-bold shadow-lg shadow-red-600/30 transition">+ Add Product</a>
   </div>
 </div>
 
 <!-- Stats Grid -->
 <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
-  <a href="{% url 'owner_products' %}" class="bg-white border border-black/5 rounded-3xl p-5 hover:border-black/20 transition shadow-sm">
-    <p class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Products</p>
-    <p class="display text-3xl lg:text-4xl mt-2 text-ink">{{ products_count }}</p>
-    <p class="text-xs text-rose mt-1">Manage catalog →</p>
+  <a href="{% url 'owner_products' %}" class="bg-[#111622] border border-white/10 rounded-3xl p-5 hover:border-red-500/50 transition-all duration-200 shadow-xl group">
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Products</p>
+    <p class="display text-3xl lg:text-4xl mt-2 text-white group-hover:text-red-400 transition">{{ products_count }}</p>
+    <p class="text-xs text-red-400 mt-1 font-medium">Manage catalog →</p>
   </a>
-  <a href="{% url 'owner_categories' %}" class="bg-white border border-black/5 rounded-3xl p-5 hover:border-black/20 transition shadow-sm">
-    <p class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Categories</p>
-    <p class="display text-3xl lg:text-4xl mt-2 text-ink">{{ categories_count }}</p>
-    <p class="text-xs text-rose mt-1">Organize shop →</p>
+  <a href="{% url 'owner_categories' %}" class="bg-[#111622] border border-white/10 rounded-3xl p-5 hover:border-red-500/50 transition-all duration-200 shadow-xl group">
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Categories</p>
+    <p class="display text-3xl lg:text-4xl mt-2 text-white group-hover:text-red-400 transition">{{ categories_count }}</p>
+    <p class="text-xs text-red-400 mt-1 font-medium">Organize shop →</p>
   </a>
-  <a href="{% url 'owner_orders' %}" class="bg-white border border-black/5 rounded-3xl p-5 hover:border-black/20 transition shadow-sm">
-    <p class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Orders</p>
-    <p class="display text-3xl lg:text-4xl mt-2 text-ink">{{ orders_count }}</p>
-    <p class="text-xs text-rose mt-1">View & fulfill →</p>
+  <a href="{% url 'owner_orders' %}" class="bg-[#111622] border border-white/10 rounded-3xl p-5 hover:border-red-500/50 transition-all duration-200 shadow-xl group">
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Orders</p>
+    <p class="display text-3xl lg:text-4xl mt-2 text-white group-hover:text-red-400 transition">{{ orders_count }}</p>
+    <p class="text-xs text-red-400 mt-1 font-medium">View & fulfill →</p>
   </a>
-  <a href="{% url 'owner_customers' %}" class="bg-white border border-black/5 rounded-3xl p-5 hover:border-black/20 transition shadow-sm">
-    <p class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Customers</p>
-    <p class="display text-3xl lg:text-4xl mt-2 text-ink">{{ customers_count }}</p>
-    <p class="text-xs text-rose mt-1">View users & roles →</p>
+  <a href="{% url 'owner_customers' %}" class="bg-[#111622] border border-white/10 rounded-3xl p-5 hover:border-red-500/50 transition-all duration-200 shadow-xl group">
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Customers</p>
+    <p class="display text-3xl lg:text-4xl mt-2 text-white group-hover:text-red-400 transition">{{ customers_count }}</p>
+    <p class="text-xs text-red-400 mt-1 font-medium">View users & roles →</p>
   </a>
-  <div class="col-span-2 lg:col-span-1 bg-ink text-white rounded-3xl p-5 shadow-sm">
-    <p class="text-[11px] uppercase tracking-widest text-white/50 font-semibold">Total Revenue</p>
-    <p class="display text-3xl lg:text-4xl mt-2">₹{{ revenue|floatformat:0 }}</p>
-    <p class="text-xs text-white/60 mt-1">Completed orders</p>
+  <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-red-600 via-rose-600 to-red-700 text-white rounded-3xl p-5 shadow-xl shadow-red-600/30">
+    <p class="text-[11px] uppercase tracking-widest text-white/70 font-semibold">Total Revenue</p>
+    <p class="display text-3xl lg:text-4xl mt-2 text-white font-bold">₹{{ revenue|floatformat:0 }}</p>
+    <p class="text-xs text-white/80 mt-1">Completed orders</p>
   </div>
 </div>
 
 <!-- Main Body Grids -->
-<div class="grid lg:grid-cols-2 gap-6 mt-6">
+<div class="grid lg:grid-cols-2 gap-6 mt-8">
   <!-- Recent Orders -->
-  <div class="bg-white border border-black/5 rounded-3xl p-6 shadow-sm">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="display text-2xl">Recent Orders</h2>
-      <a class="text-xs font-semibold text-rose hover:underline" href="{% url 'owner_orders' %}">View all ({{ orders_count }}) →</a>
+  <div class="bg-[#111622] border border-white/10 rounded-3xl p-6 shadow-xl">
+    <div class="flex justify-between items-center mb-5 border-b border-white/10 pb-3">
+      <h2 class="display text-2xl text-white font-normal">Recent Orders</h2>
+      <a class="text-xs font-semibold text-red-400 hover:underline" href="{% url 'owner_orders' %}">View all ({{ orders_count }}) →</a>
     </div>
-    <div class="divide-y divide-black/5">
+    <div class="divide-y divide-white/5">
       {% for order in recent_orders %}
-      <a href="{% url 'owner_order_detail' order.id %}" class="py-3.5 flex justify-between items-center hover:bg-cream/40 px-2 rounded-xl transition">
+      <a href="{% url 'owner_order_detail' order.id %}" class="py-3.5 flex justify-between items-center hover:bg-[#161c2d] px-3 rounded-2xl transition">
         <div>
-          <span class="font-semibold text-ink text-sm">#{{ order.id }} · {{ order.full_name }}</span>
-          <div class="text-xs text-gray-400 mt-0.5">
+          <span class="font-semibold text-white text-sm">#{{ order.id }} · {{ order.full_name }}</span>
+          <div class="text-xs text-slate-400 mt-0.5">
             {{ order.created_at|date:"d M Y, h:i A" }} · 
-            <span class="font-medium text-gray-600 capitalize">{{ order.status }}</span>
+            <span class="font-medium text-slate-300 capitalize">{{ order.status }}</span>
           </div>
         </div>
         <div class="text-right">
-          <div class="font-semibold text-sm">₹{{ order.total|floatformat:0 }}</div>
-          <span class="text-[10px] px-2 py-0.5 rounded-full font-medium {% if order.payment_status == 'Paid' %}bg-emerald-100 text-emerald-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+          <div class="font-bold text-sm text-white">₹{{ order.total|floatformat:0 }}</div>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold {% if order.payment_status == 'Paid' %}bg-emerald-950/60 text-emerald-400 border border-emerald-500/30{% else %}bg-amber-950/60 text-amber-400 border border-amber-500/30{% endif %}">
             {{ order.payment_status }}
           </span>
         </div>
       </a>
       {% empty %}
-      <p class="py-10 text-center text-gray-400 text-sm">No orders received yet.</p>
+      <p class="py-10 text-center text-slate-400 text-sm">No orders received yet.</p>
       {% endfor %}
     </div>
   </div>
@@ -76,52 +76,52 @@
   <!-- Low Stock Alert & Quick Admin Links -->
   <div class="space-y-6">
     <!-- Low Stock -->
-    <div class="bg-white border border-black/5 rounded-3xl p-6 shadow-sm">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="display text-2xl">Inventory Stock Alerts</h2>
-        <a class="text-xs font-semibold text-rose hover:underline" href="{% url 'owner_products' %}">Manage stock →</a>
+    <div class="bg-[#111622] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-5 border-b border-white/10 pb-3">
+        <h2 class="display text-2xl text-white font-normal">Inventory Stock Alerts</h2>
+        <a class="text-xs font-semibold text-red-400 hover:underline" href="{% url 'owner_products' %}">Manage stock →</a>
       </div>
-      <div class="divide-y divide-black/5">
+      <div class="divide-y divide-white/5">
         {% for p in low_stock %}
-        <div class="py-3 flex justify-between items-center px-2">
+        <div class="py-3 flex justify-between items-center px-3 hover:bg-[#161c2d] rounded-2xl transition">
           <div>
-            <div class="font-medium text-sm text-ink">{{ p.name }}</div>
-            <div class="text-xs text-gray-400">{{ p.category.name|default:"Uncategorized" }}</div>
+            <div class="font-medium text-sm text-white">{{ p.name }}</div>
+            <div class="text-xs text-slate-400">{{ p.category.name|default:"Uncategorized" }}</div>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold {% if p.stock == 0 %}text-red-600 bg-red-50{% else %}text-amber-700 bg-amber-50{% endif %} px-2.5 py-1 rounded-full">
+            <span class="text-xs font-semibold {% if p.stock == 0 %}text-red-400 bg-red-950/60 border border-red-500/30{% else %}text-amber-400 bg-amber-950/60 border border-amber-500/30{% endif %} px-2.5 py-1 rounded-full">
               {{ p.stock }} remaining
             </span>
-            <a href="{% url 'owner_product_edit' p.id %}" class="text-xs text-ink hover:underline font-semibold">Edit</a>
+            <a href="{% url 'owner_product_edit' p.id %}" class="text-xs text-red-400 hover:underline font-bold">Edit</a>
           </div>
         </div>
         {% empty %}
-        <p class="py-6 text-center text-gray-400 text-sm">All products have healthy stock levels.</p>
+        <p class="py-6 text-center text-slate-400 text-sm">All products have healthy stock levels.</p>
         {% endfor %}
       </div>
     </div>
 
     <!-- Quick Admin Shortcuts -->
-    <div class="bg-white border border-black/5 rounded-3xl p-6 shadow-sm">
-      <h2 class="display text-2xl mb-4">Admin Shortcuts</h2>
+    <div class="bg-[#111622] border border-white/10 rounded-3xl p-6 shadow-xl">
+      <h2 class="display text-2xl mb-4 text-white font-normal">Admin Shortcuts</h2>
       <div class="grid grid-cols-2 gap-3 text-sm">
-        <a href="{% url 'owner_product_new' %}" class="p-3 rounded-2xl border border-black/5 hover:bg-cream transition flex items-center gap-2">
+        <a href="{% url 'owner_product_new' %}" class="p-3.5 rounded-2xl border border-white/10 bg-[#161c2d] text-slate-200 hover:border-red-500/50 hover:text-white transition flex items-center gap-2">
           <span>➕</span>
           <span class="font-medium">New Product</span>
         </a>
-        <a href="{% url 'owner_category_new' %}" class="p-3 rounded-2xl border border-black/5 hover:bg-cream transition flex items-center gap-2">
+        <a href="{% url 'owner_category_new' %}" class="p-3.5 rounded-2xl border border-white/10 bg-[#161c2d] text-slate-200 hover:border-red-500/50 hover:text-white transition flex items-center gap-2">
           <span>🏷️</span>
           <span class="font-medium">New Category</span>
         </a>
-        <a href="{% url 'owner_customers' %}" class="p-3 rounded-2xl border border-black/5 hover:bg-cream transition flex items-center gap-2">
+        <a href="{% url 'owner_customers' %}" class="p-3.5 rounded-2xl border border-white/10 bg-[#161c2d] text-slate-200 hover:border-red-500/50 hover:text-white transition flex items-center gap-2">
           <span>👥</span>
           <span class="font-medium">Manage Roles</span>
         </a>
-        <a href="{% url 'owner_settings' %}" class="p-3 rounded-2xl border border-black/5 hover:bg-cream transition flex items-center gap-2">
+        <a href="{% url 'owner_settings' %}" class="p-3.5 rounded-2xl border border-white/10 bg-[#161c2d] text-slate-200 hover:border-red-500/50 hover:text-white transition flex items-center gap-2">
           <span>💳</span>
           <span class="font-medium">UPI / GPay</span>
         </a>
-        <a href="/admin/" target="_blank" class="col-span-2 p-3 rounded-2xl bg-rose/10 text-rose border border-rose/20 hover:bg-rose/20 transition flex items-center justify-between font-semibold">
+        <a href="/admin/" target="_blank" class="col-span-2 p-3.5 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition flex items-center justify-between font-semibold">
           <span>⚙️ Full Django Admin Interface (/admin/)</span>
           <span>↗</span>
         </a>

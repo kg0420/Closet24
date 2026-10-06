@@ -1,103 +1,109 @@
- {% extends "base.html" %}
-{% block title %}Pay with Google Pay / UPI — Closet 24{% endblock %}
+{% extends "base.html" %}
+{% block title %}UPI Payment — Follow Me Boutique{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto px-5 lg:px-8 py-12">
-    <div class="text-center max-w-xl mx-auto">
-        <p class="uppercase tracking-[.25em] text-xs text-rose font-semibold">Instant UPI Payment</p>
-        <h1 class="display text-4xl mt-2 mb-3">Complete Payment</h1>
-        <p class="text-gray-500 text-sm">Order #{{ order.id }} • Pay using Google Pay, PhonePe, Paytm or any UPI
-app</p>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+    <!-- Header -->
+    <div class="text-center max-w-xl mx-auto mb-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>⚡</span> Instant UPI Payment
+        </div>
+        <h1 class="display text-3xl sm:text-4xl text-white font-normal">Complete Your Payment</h1>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1.5 font-medium">
+            Order #{{ order.id }} • Pay using Google Pay, PhonePe, Paytm or any UPI App
+        </p>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-8 mt-10 items-start">
-        <!-- Payment Action Box -->
-        <div class="bg-white border rounded-3xl p-7 shadow-sm text-center">
-            <span class="inline-block bg-cream text-ink text-xs font-semibold px-4 py-1.5 rounded-full uppercase
-tracking-wider mb-4">
-                Amount Payable: ₹{{ amount }}
-            </span>
-
-            <!-- QR Code for Desktop / Scanner -->
-            <div class="bg-white p-4 border rounded-2xl inline-block shadow-sm mb-4">
-                <img src="{{ qr_code_url }}" alt="UPI QR Code" class="w-48 h-48 mx-auto object-contain" />
-                <p class="text-[11px] text-gray-400 mt-2">Scan with Google Pay / Any UPI App</p>
+    <div class="grid md:grid-cols-2 gap-8 items-start">
+        <!-- Left Column: Payment QR & 1-Click Redirects -->
+        <div class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-7 shadow-xl text-center relative overflow-hidden">
+            <!-- Amount Badge -->
+            <div class="inline-flex items-center gap-2 bg-[#161c2d] border border-red-500/30 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider mb-5 shadow-sm">
+                <span>💳</span> Amount Payable: <span class="text-sm font-extrabold text-red-400">₹{{ amount }}</span>
             </div>
 
-            <!-- Direct 1-Click Redirect Buttons for Mobile Users -->
-            <div class="space-y-2.5 mt-2">
-                <a href="{{ gpay_url }}" class="block w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white py-3.5 px-6 rounded-full font-medium transition shadow-sm flex items-center justify-center gap-2 text-sm">
+            <!-- QR Code Box (white background for clean scanner camera readability) -->
+            <div class="bg-white p-5 border-2 border-red-500/30 rounded-2xl inline-block shadow-2xl mb-5 relative group">
+                <img src="{{ qr_code_url }}" alt="UPI QR Code" class="w-48 h-48 mx-auto object-contain transition-transform duration-300 group-hover:scale-102" />
+                <div class="flex items-center justify-center gap-1.5 text-[11px] text-gray-700 mt-2 font-medium">
+                    <span>📱</span> Scan using any UPI Camera Scanner
+                </div>
+            </div>
+
+            <!-- Direct 1-Click Redirect Buttons -->
+            <div class="space-y-2.5 mt-1">
+                <a href="{{ gpay_url }}" class="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white py-3.5 px-6 rounded-2xl font-semibold transition shadow-md flex items-center justify-center gap-2.5 text-sm transform hover:-translate-y-0.5">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
                     Pay ₹{{ amount }} via Google Pay
                 </a>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ phonepe_url }}" class="block w-full bg-[#5f259f] hover:bg-[#4d1e82] text-white py-2.5 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
-                        Pay via PhonePe
+                <div class="grid grid-cols-2 gap-2.5">
+                    <a href="{{ phonepe_url }}" class="w-full bg-[#5f259f] hover:bg-[#4d1e82] text-white py-3 px-3 rounded-2xl text-xs font-semibold transition text-center shadow-md flex items-center justify-center gap-1.5 transform hover:-translate-y-0.5">
+                        <span>💜</span> PhonePe
                     </a>
-                    <a href="{{ paytm_url }}" class="block w-full bg-[#002e6e] hover:bg-[#001f4d] text-white py-2.5 px-3 rounded-full text-xs font-medium transition text-center shadow-sm">
-                        Pay via Paytm
+                    <a href="{{ paytm_url }}" class="w-full bg-[#002e6e] hover:bg-[#001f4d] text-white py-3 px-3 rounded-2xl text-xs font-semibold transition text-center shadow-md flex items-center justify-center gap-1.5 transform hover:-translate-y-0.5">
+                        <span>💙</span> Paytm UPI
                     </a>
                 </div>
 
-                <a href="{{ upi_url }}" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 px-4 rounded-full text-xs font-medium transition text-center">
-                    Pay with other UPI App (CRED, BHIM)
+                <a href="{{ upi_url }}" class="w-full bg-[#161c2d] hover:bg-white/10 text-slate-200 py-2.5 px-4 rounded-2xl text-xs font-semibold transition text-center border border-white/10 block">
+                    Other UPI Apps (CRED, BHIM, Amazon Pay)
                 </a>
             </div>
 
-            <div class="border-t mt-5 pt-4 text-left text-xs text-gray-500 space-y-1">
-                <p><b>Business Name:</b> <span class="text-ink font-medium">{{ upi_name }}</span></p>
-                <p class="text-[11px] text-gray-400">Desktop users: Scan the QR code with any UPI app to pay directly.</p>
+            <!-- Business Credential Footer -->
+            <div class="border-t border-white/10 mt-6 pt-4 text-left text-xs text-slate-400 space-y-1">
+                <p><b>Payee Account:</b> <span class="text-white font-semibold">{{ upi_name }}</span></p>
+                <p class="text-[11px] text-slate-500">Desktop shoppers can simply open any UPI app on mobile and scan the QR code directly.</p>
             </div>
         </div>
 
-        <!-- Verification Form & GST Breakdown -->
+        <!-- Right Column: Verification Form & Summary -->
         <div class="space-y-6">
-            <!-- GST & Order Summary -->
-            <div class="bg-cream rounded-3xl p-6">
-                <h3 class="display text-xl mb-4">Price & GST Summary</h3>
-                <div class="space-y-2 text-sm border-b border-black/10 pb-4">
-                    <div class="flex justify-between">
+            <!-- Order Total Recap -->
+            <div class="bg-[#111622] border border-white/10 rounded-3xl p-6 shadow-xl">
+                <h3 class="display text-xl text-white font-normal mb-4 flex items-center justify-between">
+                    <span>Order Summary</span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#161c2d] border border-white/10 text-slate-200">#{{ order.id }}</span>
+                </h3>
+                <div class="space-y-2 text-sm border-b border-white/10 pb-4">
+                    <div class="flex justify-between text-slate-300">
                         <span>Items Subtotal</span>
-                        <span>₹{{ order.subtotal|floatformat:2 }}</span>
+                        <span class="font-semibold text-white">₹{{ order.subtotal|floatformat:2 }}</span>
                     </div>
-                    {% if order.cgst > 0 %}
-                    <div class="flex justify-between text-gray-600">
-                        <span>CGST</span>
-                        <span>₹{{ order.cgst|floatformat:2 }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>SGST</span>
-                        <span>₹{{ order.sgst|floatformat:2 }}</span>
-                    </div>
-                    {% else %}
-                    <div class="flex justify-between text-gray-600">
-                        <span>IGST</span>
-                        <span>₹{{ order.igst|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="flex justify-between text-xs text-gray-500">
-                        <span>Total Tax Amount</span>
-                        <span>₹{{ order.total_tax|floatformat:2 }}</span>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Fulfillment</span>
+                        <span class="text-emerald-400 font-semibold">Boutique Local Pickup / Shipping</span>
                     </div>
                 </div>
-                <div class="flex justify-between pt-4 font-bold text-lg">
+                <div class="flex justify-between pt-4 font-bold text-lg text-white items-baseline">
                     <span>Total Amount</span>
-                    <span>₹{{ order.total|floatformat:2 }}</span>
+                    <span class="text-2xl font-extrabold text-white">₹{{ order.total|floatformat:2 }}</span>
                 </div>
             </div>
 
-            <!-- Reference / UTR Input -->
-            <form method="post" class="bg-white border rounded-3xl p-6 shadow-sm">
+            <!-- Step 2: Reference / UTR Input Card -->
+            <form method="post" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-7 shadow-xl">
                 {% csrf_token %}
-                <h4 class="font-semibold text-sm mb-2">Step 2: Enter Transaction Reference</h4>
-                <p class="text-xs text-gray-500 mb-4">After paying in Google Pay / UPI, enter the 12-digit UTR or
-Transaction ID below to confirm:</p>
-                <input type="text" name="payment_reference" placeholder="e.g. 402918291029" required class="w-
-full border rounded-xl p-3 text-sm focus:outline-none focus:border-ink mb-4 font-mono" />
-                <button type="submit" class="w-full bg-ink hover:bg-black text-white py-3 rounded-full font-
-medium text-sm transition">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                    <h4 class="font-semibold text-sm text-white uppercase tracking-wide">Enter Transaction Reference</h4>
+                </div>
+                <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                    Once paid in Google Pay or your UPI app, please enter the <b class="text-white">12-digit UTR</b> or <b class="text-white">Transaction ID</b> below to confirm your order:
+                </p>
+                
+                <div class="mb-4">
+                    <input type="text" name="payment_reference" placeholder="e.g. 402918291029" required 
+                           class="w-full border border-white/15 rounded-2xl p-3.5 text-sm bg-[#161c2d] text-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 font-mono tracking-wider transition placeholder:text-slate-500">
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white py-3.5 rounded-2xl font-semibold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 transition-all transform hover:-translate-y-0.5">
                     Confirm & Submit Reference →
                 </button>
+
+                <p class="text-[11px] text-slate-500 text-center mt-3">
+                    🔒 Once submitted, your order status updates to verification and receipt is generated.
+                </p>
             </form>
         </div>
     </div>

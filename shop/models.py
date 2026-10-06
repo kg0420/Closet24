@@ -96,25 +96,43 @@ class Product(models.Model):
     @property
     def display_image(self):
         if self.image:
-            return self.image.url
+            try:
+                return self.image.url
+            except Exception:
+                pass
         if self.image_url:
             return self.image_url
         first_gallery = self.gallery_images.first()
         if first_gallery and first_gallery.image:
-            return first_gallery.image.url
+            try:
+                return first_gallery.image.url
+            except Exception:
+                pass
         return ""
 
     @property
     def all_images(self):
         images = []
         if self.image:
-            images.append(self.image.url)
-        elif self.image_url:
+            try:
+                images.append(self.image.url)
+            except Exception:
+                pass
+        if self.image_url and self.image_url not in images:
             images.append(self.image_url)
         for gi in self.gallery_images.all():
-            if gi.image and gi.image.url not in images:
-                images.append(gi.image.url)
+            try:
+                if gi.image and gi.image.url not in images:
+                    images.append(gi.image.url)
+            except Exception:
+                pass
         return images
+
+    @property
+    def size_list(self):
+        if not self.sizes:
+            return []
+        return [s.strip() for s in self.sizes.split(",") if s.strip()]
 
     @property
     def gst_amount(self):
@@ -187,8 +205,12 @@ class OrderItem(models.Model):
             return self.price * self.quantity
 
         @property
+        def subtotal(self):
+            return self.item_subtotal
+
+        @property
         def item_total(self):
-            return (self.price * self.quantity) + (self.gst_amount *self.quantity)
+            return (self.price * self.quantity) + (self.gst_amount * self.quantity)
 
         def __str__(self):
             return f"{self.product.name} x {self.quantity}"

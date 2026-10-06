@@ -1,29 +1,31 @@
 {% extends "owner/base.html" %}
-{% block title %}{{ heading }} — FOLLOW ME{% endblock %}
+{% block title %}{{ heading }} — Follow Me Boutique{% endblock %}
 {% block owner_content %}
 <div class="max-w-2xl">
-  <a href="{% url 'owner_categories' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-ink font-medium">← Back to Categories</a>
-  <h1 class="display text-4xl mt-4">{{ heading }}</h1>
-  <p class="text-gray-500 mt-2">Categories group items in the main store navigation and filter pages.</p>
+  <a href="{% url 'owner_categories' %}" class="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-white font-medium">← Back to Categories</a>
+  <h1 class="display text-4xl mt-3 text-white">{{ heading }}</h1>
+  <p class="text-slate-400 mt-1.5 text-sm">Categories group items in the main store navigation and filter pages.</p>
 
-  <form method="post" class="bg-white border border-black/5 rounded-3xl p-7 mt-6 space-y-5 shadow-sm">
+  <form method="post" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-8 mt-6 space-y-5 shadow-2xl">
     {% csrf_token %}
     {% for field in form %}
     <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">{{ field.label }}</label>
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">{{ field.label }}</label>
       {{ field }}
       {% if field.help_text %}
-      <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+      <p class="text-xs text-slate-500 mt-1">{{ field.help_text }}</p>
       {% endif %}
       {% if field.errors %}
-      <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
+      <p class="text-red-400 text-xs mt-1">{{ field.errors|striptags }}</p>
       {% endif %}
     </div>
     {% endfor %}
 
-    <div class="flex items-center gap-4 pt-3">
-      <button type="submit" class="bg-ink text-white rounded-full px-7 py-3 text-sm font-medium hover:bg-black/80 transition">{{ button }}</button>
-      <a href="{% url 'owner_categories' %}" class="text-xs text-gray-500 hover:underline">Cancel</a>
+    <div class="flex items-center gap-4 pt-4 border-t border-white/10">
+      <button type="submit" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-bold shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
+        {{ button }}
+      </button>
+      <a href="{% url 'owner_categories' %}" class="text-xs text-slate-400 hover:text-white underline">Cancel</a>
     </div>
   </form>
 </div>
@@ -31,15 +33,19 @@
 <style>
   input, textarea, select {
     width: 100%;
-    border: 1px solid #e5e5e5;
-    border-radius: 14px;
-    padding: .85rem 1rem;
-    font-size: .875rem;
-    transition: border-color .15s;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background-color: #161c2d;
+    color: #ffffff;
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.15s ease;
   }
   input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #111;
+    background-color: #1a2236;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
   }
 </style>
 {% endblock %}

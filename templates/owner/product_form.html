@@ -1,45 +1,150 @@
 {% extends "owner/base.html" %}
-{% block title %}{{ heading }} — FOLLOW ME{% endblock %}
+{% block title %}{{ heading }} — Follow Me Boutique{% endblock %}
 {% block owner_content %}
 <div class="max-w-3xl">
-  <a href="{% url 'owner_products' %}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-ink font-medium">← Back to Products</a>
-  <h1 class="display text-4xl mt-4">{{ heading }}</h1>
-  <p class="text-gray-500 mt-2">Fill the product details and upload multiple photos below.</p>
+  <a href="{% url 'owner_products' %}" class="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-white font-medium">← Back to Products</a>
+  <h1 class="display text-4xl mt-3 text-white">{{ heading }}</h1>
+  <p class="text-slate-400 mt-1.5 text-sm">Fill in the product details and upload multiple photos below.</p>
 
-  <form method="post" enctype="multipart/form-data" class="bg-white border border-black/5 rounded-3xl p-7 mt-6 space-y-5 shadow-sm">
+  <form method="post" enctype="multipart/form-data" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-8 mt-6 space-y-6 shadow-2xl">
     {% csrf_token %}
 
-    {% for field in form %}
-    <div>
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">{{ field.label }}</label>
-      {{ field }}
-      {% if field.help_text %}
-      <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
-      {% endif %}
-      {% if field.errors %}
-      <p class="text-red-500 text-xs mt-1">{{ field.errors|striptags }}</p>
-      {% endif %}
+    {% if form.non_field_errors %}
+    <div class="p-4 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs">
+      {{ form.non_field_errors }}
     </div>
-    {% endfor %}
+    {% endif %}
 
-    <!-- Multiple Gallery Images Upload Field -->
-    <div class="pt-2 border-t border-black/5">
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-1">
+    <div class="grid sm:grid-cols-2 gap-5">
+      <!-- Name -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Product Name <span class="text-red-500">*</span>
+        </label>
+        {{ form.name }}
+        {% if form.name.errors %}<p class="text-red-400 text-xs mt-1">{{ form.name.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Category -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">Category</label>
+        {{ form.category }}
+        {% if form.category.errors %}<p class="text-red-400 text-xs mt-1">{{ form.category.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Selling Price (₹) <span class="text-red-500">*</span>
+        </label>
+        {{ form.price }}
+        {% if form.price.errors %}<p class="text-red-400 text-xs mt-1">{{ form.price.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Compare at Price -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Original / MRP Price (₹) <span class="text-slate-500 font-normal lowercase">(optional for discount badge)</span>
+        </label>
+        {{ form.compare_at_price }}
+        {% if form.compare_at_price.errors %}<p class="text-red-400 text-xs mt-1">{{ form.compare_at_price.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Stock Quantity -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Stock Quantity <span class="text-red-500">*</span>
+        </label>
+        {{ form.stock }}
+        {% if form.stock.errors %}<p class="text-red-400 text-xs mt-1">{{ form.stock.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Sizes -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Available Sizes (comma-separated)
+        </label>
+        {{ form.sizes }}
+        <p class="text-[11px] text-slate-500 mt-1">e.g. 28, 30, 32, 34 or S, M, L, XL</p>
+        {% if form.sizes.errors %}<p class="text-red-400 text-xs mt-1">{{ form.sizes.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}<p class="text-red-400 text-xs mt-1">{{ form.description.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Primary Photo Upload -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Main Image File (Upload from device)
+        </label>
+        {{ form.image }}
+        {% if form.image.errors %}<p class="text-red-400 text-xs mt-1">{{ form.image.errors|striptags }}</p>{% endif %}
+        
+        {% if product and product.image %}
+        <div class="mt-3 flex items-center gap-3 p-3 bg-[#161c2d] rounded-2xl border border-white/10">
+          <img src="{{ product.image.url }}" class="w-12 h-14 object-cover rounded-lg border border-white/10 shrink-0" alt="Current image">
+          <div class="text-xs">
+            <p class="text-slate-300 font-medium">Currently uploaded photo</p>
+            <label class="flex items-center gap-1.5 text-red-400 hover:text-red-300 cursor-pointer mt-1 font-semibold">
+              <input type="checkbox" name="clear_main_image" value="1" class="rounded">
+              Remove this uploaded photo
+            </label>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- External Image URL -->
+      <div>
+        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
+          Or Main Image Web URL <span class="text-slate-500 font-normal lowercase">(optional)</span>
+        </label>
+        {{ form.image_url }}
+        <p class="text-[11px] text-slate-500 mt-1">Paste direct link (https://...) if image is hosted online.</p>
+        {% if form.image_url.errors %}<p class="text-red-400 text-xs mt-1">{{ form.image_url.errors|striptags }}</p>{% endif %}
+      </div>
+
+      <!-- Featured & Is New Toggles -->
+      <div class="sm:col-span-2 flex flex-wrap gap-6 pt-2">
+        <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+          {{ form.featured }}
+          <span>⭐ Feature this product on Homepage Spotlight</span>
+        </label>
+        <label class="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+          {{ form.is_new }}
+          <span>✨ Mark as "New In" arrival</span>
+        </label>
+      </div>
+
+      <!-- Hidden / Optional GST Rate preserved for business logic -->
+      <div class="hidden">
+        {{ form.gst_rate }}
+      </div>
+    </div>
+
+    <!-- Additional Gallery Photos Upload -->
+    <div class="pt-5 border-t border-white/10">
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
         📸 Additional Gallery Photos (Upload Multiple)
       </label>
-      <input type="file" name="gallery_images" multiple accept="image/*" class="w-full border rounded-xl p-3 text-sm bg-white" />
-      <p class="text-xs text-gray-400 mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple photos at once. They will appear as interactive thumbnails on the product page.</p>
+      <input type="file" name="gallery_images" multiple accept="image/*" 
+             class="w-full border border-white/15 rounded-2xl p-3 text-xs bg-[#161c2d] text-slate-300 focus:outline-none focus:border-red-500" />
+      <p class="text-xs text-slate-500 mt-1">Select one or multiple photos to show as gallery carousel thumbnails on the product page.</p>
     </div>
 
     <!-- Existing Gallery Images Preview (if editing) -->
     {% if product and product.gallery_images.all %}
-    <div class="pt-4 border-t border-black/5">
-      <label class="block text-xs uppercase tracking-widest text-gray-500 font-semibold mb-3">
+    <div class="pt-5 border-t border-white/10">
+      <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-3">
         Current Gallery Photos ({{ product.gallery_images.count }})
       </label>
       <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         {% for g in product.gallery_images.all %}
-        <div class="relative group rounded-xl overflow-hidden border border-black/10 aspect-[3/4] bg-cream">
+        <div class="relative group rounded-xl overflow-hidden border border-white/10 aspect-[3/4] bg-[#090d16]">
           <img src="{{ g.image.url }}" class="w-full h-full object-cover" alt="Gallery photo">
           <button type="submit" formaction="{% url 'owner_product_delete_gallery_image' g.id %}" onclick="return confirm('Remove this photo from gallery?');"
             class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-90 group-hover:opacity-100 transition shadow">
@@ -51,9 +156,14 @@
     </div>
     {% endif %}
 
-    <div class="flex items-center gap-4 pt-4 border-t border-black/5">
-      <button type="submit" class="bg-ink text-white rounded-full px-8 py-3.5 text-sm font-semibold hover:bg-black/80 transition">{{ button }}</button>
-      <a href="{% url 'owner_products' %}" class="text-xs text-gray-500 hover:underline font-medium">Cancel</a>
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-4 pt-6 border-t border-white/10">
+      <button type="submit" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-bold shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
+        {{ button }}
+      </button>
+      <a href="{% url 'owner_products' %}" class="text-xs text-slate-400 hover:text-white font-medium underline">
+        Cancel & Back to Products
+      </a>
     </div>
   </form>
 </div>
@@ -61,19 +171,26 @@
 <style>
   input, textarea, select {
     width: 100%;
-    border: 1px solid #e5e5e5;
-    border-radius: 14px;
-    padding: .85rem 1rem;
-    font-size: .875rem;
-    transition: border-color .15s;
-  }
-  input[type=checkbox] {
-    width: auto;
-    margin-right: .5rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background-color: #161c2d;
+    color: #ffffff;
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.15s ease;
   }
   input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #111;
+    background-color: #1a2236;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  }
+  input[type=checkbox] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #ef4444;
+    cursor: pointer;
+    border-radius: 0.35rem;
   }
 </style>
 {% endblock %}
