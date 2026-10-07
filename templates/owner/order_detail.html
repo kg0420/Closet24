@@ -65,6 +65,22 @@
                 </select>
             </div>
 
+            <div class="border-t border-white/10 pt-4 space-y-3">
+                <p class="text-xs font-bold text-red-400 uppercase tracking-wider">🚚 Courier & Tracking Details</p>
+                <div>
+                    <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Courier Partner</label>
+                    <input type="text" name="courier_partner" value="{{ order.courier_partner }}" placeholder="e.g. Delhivery, Blue Dart, DTDC, India Post" class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500">
+                </div>
+                <div>
+                    <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Tracking / AWB Number</label>
+                    <input type="text" name="tracking_number" value="{{ order.tracking_number }}" placeholder="e.g. 142028192801" class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500 font-mono">
+                </div>
+                <div>
+                    <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Direct Tracking URL</label>
+                    <input type="url" name="tracking_url" value="{{ order.tracking_url }}" placeholder="https://www.delhivery.com/track/package/..." class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500">
+                </div>
+            </div>
+
             <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full py-3.5 font-bold text-sm shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
                 Save Order Changes
             </button>

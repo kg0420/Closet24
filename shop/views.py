@@ -8,7 +8,13 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
-from slugify import slugify
+from django.utils.text import slugify
+from datetime import datetime, time as dtime
+import random
+import time
+from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .forms import CategoryForm, CheckoutForm, ProductForm, RegisterForm
 from .models import Category, Order, OrderItem, Product, Profile, ShopSettings, ProductImage
@@ -148,20 +154,131 @@ def remove_from_cart(request, key):
     return redirect("cart")
 
 
+def _send_otp_email(email, otp_code):
+    subject = "Your Verification Code - Follow Me Boutique"
+    message = (
+        f"Hello,\n\n"
+        f"Thank you for joining Follow Me Boutique!\n"
+        f"Your one-time verification code (OTP) is: {otp_code}\n\n"
+        f"This code is valid for 10 minutes. Please do not share this code with anyone.\n\n"
+        f"Warm regards,\n"
+        f"Follow Me Boutique Team"
+    )
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@followmeboutique.com")
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=from_email,
+        recipient_list=[email],
+        fail_silently=False,
+    )
+
+
 def register(request):
     next_url = request.GET.get("next") or request.POST.get("next") or "home"
     if request.user.is_authenticated:
         return redirect(next_url)
+
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            Profile.objects.create(user=user, role="customer")
-            login(request, user)
-            return redirect(next_url)
+            # Generate 6-digit OTP
+            otp_code = f"{random.randint(100000, 999999)}"
+            email = form.cleaned_data.get("email")
+
+            try:
+                _send_otp_email(email, otp_code)
+            except Exception as e:
+                messages.error(
+                    request,
+                    f"Unable to send verification email. Please check your email address or SMTP configuration: {e}"
+                )
+                return render(request, "auth/register.html", {"form": form, "next": next_url})
+
+            # Store sanitized form registration data & OTP timestamp in session
+            request.session["pending_registration"] = {
+                "post_data": request.POST.dict(),
+                "email": email,
+                "otp": otp_code,
+                "expires_at": int(time.time()) + 600,  # 10 minutes
+                "next": next_url,
+            }
+            request.session.modified = True
+            messages.success(request, f"A 6-digit verification code has been sent to {email}.")
+            return redirect("verify_registration_otp")
     else:
         form = RegisterForm()
+
     return render(request, "auth/register.html", {"form": form, "next": next_url})
+
+
+def verify_registration_otp(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    pending = request.session.get("pending_registration")
+    if not pending:
+        messages.warning(request, "No pending registration found. Please fill in the sign-up form.")
+        return redirect("register")
+
+    next_url = pending.get("next", "home")
+    email = pending.get("email", "")
+
+    if request.method == "POST":
+        submitted_otp = request.POST.get("otp", "").strip()
+        expected_otp = pending.get("otp", "")
+        expires_at = pending.get("expires_at", 0)
+
+        if int(time.time()) > expires_at:
+            messages.error(request, "The verification code has expired. Please request a new code.")
+            return render(request, "auth/verify_otp.html", {"email": email})
+
+        if submitted_otp != expected_otp:
+            messages.error(request, "Invalid verification code. Please check and try again.")
+            return render(request, "auth/verify_otp.html", {"email": email})
+
+        # OTP is valid, proceed with creating user account
+        post_data = pending.get("post_data", {})
+        form = RegisterForm(post_data)
+        if form.is_valid():
+            user = form.save()
+            Profile.objects.create(user=user, role="customer")
+
+            # Clean session
+            request.session.pop("pending_registration", None)
+            request.session.modified = True
+
+            login(request, user)
+            messages.success(request, "Account verified and created successfully! Welcome to Follow Me Boutique.")
+            return redirect(next_url)
+        else:
+            errors = " ".join([f"{f}: {e[0]}" for f, e in form.errors.items()])
+            messages.error(request, f"Could not create account: {errors}")
+            return redirect("register")
+
+    return render(request, "auth/verify_otp.html", {"email": email})
+
+
+def resend_registration_otp(request):
+    pending = request.session.get("pending_registration")
+    if not pending:
+        messages.warning(request, "No registration session found. Please register again.")
+        return redirect("register")
+
+    email = pending.get("email")
+    otp_code = f"{random.randint(100000, 999999)}"
+
+    try:
+        _send_otp_email(email, otp_code)
+        pending["otp"] = otp_code
+        pending["expires_at"] = int(time.time()) + 600
+        request.session["pending_registration"] = pending
+        request.session.modified = True
+        messages.success(request, f"A new verification code has been sent to {email}.")
+    except Exception as e:
+        messages.error(request, f"Failed to resend code: {e}")
+
+    return redirect("verify_registration_otp")
 
 
 def login_view(request):
@@ -259,6 +376,16 @@ def checkout(request):
 @login_required
 def payment_page(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # Safeguard 1: Do not allow payment submission if order is already Paid or Cancelled
+    if order.payment_status.strip().lower() == "paid":
+        messages.info(request, f"Order #{order.id} is already marked as Paid and verified.")
+        return redirect("order_success", order_id=order.id)
+
+    if order.status == "cancelled":
+        messages.error(request, f"Order #{order.id} has been cancelled. Payment cannot be accepted.")
+        return redirect("my_orders")
+
     settings_obj = ShopSettings.objects.first() or ShopSettings.objects.create()
 
     upi_id = settings_obj.upi_id or "yourboutique@upi"
@@ -267,9 +394,6 @@ def payment_page(request, order_id):
     note = f"Order #{order.id} Boutique"
 
     # Construct standard NPCI compliant Merchant UPI URI
-    # 'mc=5691' (Men's & Women's Clothing Stores / Apparel)
-    # 'mode=02' (Secure dynamic web intent)
-    # 'tr' (Unique transaction reference ID)
     upi_params = {
         "pa": upi_id,
         "pn": upi_name,
@@ -293,14 +417,19 @@ def payment_page(request, order_id):
 
     if request.method == "POST":
         utr = request.POST.get("payment_reference", "").strip()
-        if utr:
+        if not utr:
+            messages.error(request, "Please enter your 12-digit UTR or Transaction ID.")
+        elif len(utr) < 8 or len(utr) > 30:
+            messages.error(request, "Invalid reference format. Standard UPI UTR / Transaction IDs are between 8 and 30 characters.")
+        elif Order.objects.filter(payment_reference__iexact=utr).exclude(pk=order.pk).exists():
+            # Safeguard 2: Duplicate UTR detection across orders
+            messages.error(request, "This Transaction ID / UTR has already been submitted for another order. Please check and provide your unique receipt reference.")
+        else:
             order.payment_reference = utr
             order.payment_status = "Submitted / Under Verification"
-            order.save(update_fields=["payment_reference","payment_status"])
+            order.save(update_fields=["payment_reference", "payment_status"])
             messages.success(request, "Payment reference submitted! We will verify and process your order.")
             return redirect("order_success", order_id=order.id)
-        else:
-            messages.error(request, "Please enter the UTR or Google Pay Transaction ID.")
 
     return render(request, "payment.html", {
         "order": order,
@@ -617,7 +746,100 @@ def owner_customer_toggle_role(request, user_id):
 
 @owner_required
 def owner_orders(request):
-    return render(request, "owner/orders.html", {"orders": Order.objects.all()})
+    orders = Order.objects.all().select_related("user")
+
+    # Search query (by Order ID, Customer Name, Phone, Pincode, or Payment Reference)
+    q = request.GET.get("q", "").strip()
+    if q:
+        orders = orders.filter(
+            Q(id__icontains=q)
+            | Q(full_name__icontains=q)
+            | Q(phone__icontains=q)
+            | Q(pincode__icontains=q)
+            | Q(payment_reference__icontains=q)
+            | Q(user__username__icontains=q)
+        )
+
+    # Fulfillment Status filter
+    status = request.GET.get("status", "").strip()
+    if status and status != "all":
+        orders = orders.filter(status=status)
+
+    # Payment Status filter
+    payment_status = request.GET.get("payment_status", "").strip()
+    if payment_status and payment_status != "all":
+        orders = orders.filter(payment_status=payment_status)
+
+    # Date range filters (YYYY-MM-DD)
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+
+    if date_from and date_to:
+        try:
+            d_from = datetime.strptime(date_from, "%Y-%m-%d")
+            d_to = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            if d_from > d_to:
+                messages.error(request, "'From Date' cannot be after 'To Date'. Please select a valid date range.")
+                date_from = ""
+                date_to = ""
+            else:
+                orders = orders.filter(created_at__gte=d_from, created_at__lte=d_to)
+        except ValueError:
+            pass
+    elif date_from:
+        try:
+            d_from = datetime.strptime(date_from, "%Y-%m-%d")
+            orders = orders.filter(created_at__gte=d_from)
+        except ValueError:
+            pass
+    elif date_to:
+        try:
+            d_to = datetime.strptime(date_to, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            orders = orders.filter(created_at__lte=d_to)
+        except ValueError:
+            pass
+
+    # Quick preset filter (e.g. today, last 7 days, this month)
+    preset = request.GET.get("preset", "").strip()
+    now = timezone.now()
+    if preset == "today":
+        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        orders = orders.filter(created_at__gte=start_of_day)
+    elif preset == "week":
+        seven_days_ago = now - timezone.timedelta(days=7)
+        orders = orders.filter(created_at__gte=seven_days_ago)
+    elif preset == "month":
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        orders = orders.filter(created_at__gte=start_of_month)
+
+    # Sorting
+    sort = request.GET.get("sort", "newest")
+    if sort == "oldest":
+        orders = orders.order_by("created_at")
+    elif sort == "highest":
+        orders = orders.order_by("-total")
+    elif sort == "lowest":
+        orders = orders.order_by("total")
+    else:
+        orders = orders.order_by("-created_at")
+
+    # Aggregate summaries for the filtered view
+    total_revenue = orders.filter(payment_status="Paid").aggregate(Sum("total"))["total__sum"] or Decimal("0.00")
+    total_count = orders.count()
+
+    return render(request, "owner/orders.html", {
+        "orders": orders,
+        "total_count": total_count,
+        "total_revenue": total_revenue,
+        "status_choices": Order.STATUS_CHOICES,
+        "query": q,
+        "current_status": status,
+        "current_payment_status": payment_status,
+        "date_from": date_from,
+        "date_to": date_to,
+        "current_preset": preset,
+        "current_sort": sort,
+    })
 
 
 @owner_required
@@ -626,11 +848,41 @@ def owner_order_detail(request, order_id):
     if request.method == "POST":
         status = request.POST.get("status")
         payment_status = request.POST.get("payment_status")
+        courier_partner = request.POST.get("courier_partner", "").strip()
+        tracking_number = request.POST.get("tracking_number", "").strip()
+        tracking_url = request.POST.get("tracking_url", "").strip()
+
+        old_status = order.status
         if status in dict(Order.STATUS_CHOICES):
             order.status = status
         if payment_status:
             order.payment_status = payment_status
-        order.save()
+
+        order.courier_partner = courier_partner
+        order.tracking_number = tracking_number
+        order.tracking_url = tracking_url
+
+        # Stock Replenishment Logic on Cancellation
+        if order.status == "cancelled" and not order.stock_restored:
+            with transaction.atomic():
+                for item in order.items.select_related("product"):
+                    item.product.stock += item.quantity
+                    item.product.save(update_fields=["stock"])
+                order.stock_restored = True
+                order.save()
+            messages.info(request, "Order cancelled: All reserved product stocks were replenished back to inventory.")
+        elif old_status == "cancelled" and order.status != "cancelled" and order.stock_restored:
+            # Re-deduct stock if un-cancelling
+            with transaction.atomic():
+                for item in order.items.select_related("product"):
+                    item.product.stock = max(0, item.product.stock - item.quantity)
+                    item.product.save(update_fields=["stock"])
+                order.stock_restored = False
+                order.save()
+            messages.info(request, "Order re-opened: Reserved product stocks deducted from inventory.")
+        else:
+            order.save()
+
         messages.success(request, "Order updated successfully.")
         return redirect("owner_order_detail", order_id=order.id)
     return render(request, "owner/order_detail.html", {"order": order})
@@ -641,8 +893,14 @@ def owner_order_delete(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == "POST":
         order_num = order.id
+        # Replenish stock if order was never cancelled before deletion
+        if not order.stock_restored:
+            with transaction.atomic():
+                for item in order.items.select_related("product"):
+                    item.product.stock += item.quantity
+                    item.product.save(update_fields=["stock"])
         order.delete()
-        messages.success(request, f"Order #{order_num} was deleted successfully.")
+        messages.success(request, f"Order #{order_num} was deleted and product inventory was safely updated.")
     return redirect("owner_orders")
 
 

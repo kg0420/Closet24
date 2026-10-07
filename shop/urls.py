@@ -12,6 +12,8 @@ urlpatterns = [
     path("cart/remove/<str:key>/", views.remove_from_cart, name="remove_from_cart"),
 
     path("register/", views.register, name="register"),
+    path("register/verify-otp/", views.verify_registration_otp, name="verify_registration_otp"),
+    path("register/resend-otp/", views.resend_registration_otp, name="resend_registration_otp"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
 

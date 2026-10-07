@@ -190,7 +190,11 @@ class Order(models.Model):
         status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="placed")
         payment_method = models.CharField(max_length=50, default="Google Pay / UPI")
         payment_reference = models.CharField(max_length=100, blank=True, help_text="UPI Transaction ID / UTR")
-        payment_status = models.CharField(max_length=20, default="Pending")
+        payment_status = models.CharField(max_length=40, default="Pending")
+        courier_partner = models.CharField(max_length=100, blank=True, help_text="e.g. Delhivery, Blue Dart, India Post")
+        tracking_number = models.CharField(max_length=100, blank=True, help_text="AWB / Tracking Number")
+        tracking_url = models.URLField(blank=True, help_text="Direct link to track shipment")
+        stock_restored = models.BooleanField(default=False, help_text="Prevents duplicate stock replenishment on cancellation")
         created_at = models.DateTimeField(auto_now_add=True)
 
         class Meta:

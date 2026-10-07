@@ -1,30 +1,229 @@
 {% extends "owner/base.html" %}
-{% block title %}Orders — Follow Me Boutique{% endblock %}
+{% block title %}Orders Management — Follow Me Boutique{% endblock %}
 {% block owner_content %}
-<div class="border-b border-white/10 pb-6 mb-7">
-  <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Sales & Fulfillment</p>
-  <h1 class="display text-4xl mt-2 text-white">Orders</h1>
-  <p class="text-slate-400 mt-1.5 text-sm">Click any order to view customer details, verify payment, and fulfill status.</p>
+<!-- Header & Quick Metrics -->
+<div class="flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-6 mb-7 gap-4">
+  <div>
+    <p class="uppercase tracking-widest text-xs text-red-400 font-bold">Sales & Fulfillment Operations</p>
+    <h1 class="display text-4xl mt-1 text-white">Orders Directory</h1>
+    <p class="text-slate-400 mt-1 text-xs sm:text-sm">Manage fulfillment, verify UPI payments, dispatch shipments & trace deliveries.</p>
+  </div>
+
+  <!-- Metric Badges -->
+  <div class="flex items-center gap-3">
+    <div class="bg-[#111622] border border-white/10 rounded-2xl px-4 py-2.5 shadow-md">
+      <span class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Filtered Orders</span>
+      <span class="text-lg font-bold text-white">{{ total_count }}</span>
+    </div>
+    <div class="bg-[#111622] border border-emerald-500/20 rounded-2xl px-4 py-2.5 shadow-md">
+      <span class="block text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Verified Revenue</span>
+      <span class="text-lg font-bold text-emerald-400">₹{{ total_revenue|floatformat:0 }}</span>
+    </div>
+  </div>
 </div>
 
+<!-- Advanced Filter & Search Bar -->
+<div class="bg-[#111622] border border-white/10 rounded-3xl p-5 sm:p-6 mb-7 shadow-xl">
+  <form method="get" class="space-y-4">
+    <!-- Row 1: Search Query + Quick Date Presets -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+      <!-- Search Input -->
+      <div class="md:col-span-6 relative">
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ query }}" 
+          placeholder="Search by Order #, Customer Name, Phone, Pincode or UTR..." 
+          class="w-full bg-[#161c2d] border border-white/15 rounded-2xl py-3 pl-10 pr-4 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 placeholder:text-slate-500 transition"
+        >
+        <span class="absolute left-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
+        {% if query %}
+        <a href="{% url 'owner_orders' %}" class="absolute right-3.5 top-3 text-xs text-slate-400 hover:text-white" title="Clear Search">✕</a>
+        {% endif %}
+      </div>
+
+      <!-- Quick Date Presets -->
+      <div class="md:col-span-6 flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+        <span class="text-[11px] uppercase font-bold text-slate-400 shrink-0">Quick Filter:</span>
+        <a href="?preset=today{% if current_status %}&status={{ current_status }}{% endif %}{% if current_payment_status %}&payment_status={{ current_payment_status }}{% endif %}" 
+           class="px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition border {% if current_preset == 'today' %}bg-red-600 border-red-500 text-white{% else %}bg-[#161c2d] border-white/10 text-slate-300 hover:border-white/20{% endif %}">
+           📅 Today
+        </a>
+        <a href="?preset=week{% if current_status %}&status={{ current_status }}{% endif %}{% if current_payment_status %}&payment_status={{ current_payment_status }}{% endif %}" 
+           class="px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition border {% if current_preset == 'week' %}bg-red-600 border-red-500 text-white{% else %}bg-[#161c2d] border-white/10 text-slate-300 hover:border-white/20{% endif %}">
+           ⚡ Last 7 Days
+        </a>
+        <a href="?preset=month{% if current_status %}&status={{ current_status }}{% endif %}{% if current_payment_status %}&payment_status={{ current_payment_status }}{% endif %}" 
+           class="px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition border {% if current_preset == 'month' %}bg-red-600 border-red-500 text-white{% else %}bg-[#161c2d] border-white/10 text-slate-300 hover:border-white/20{% endif %}">
+           🗓️ This Month
+        </a>
+        {% if current_preset or query or current_status or current_payment_status or date_from or date_to %}
+        <a href="{% url 'owner_orders' %}" class="px-3 py-2 rounded-xl text-xs font-semibold shrink-0 text-red-400 hover:text-red-300 underline">
+          Reset All
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Row 2: Date Pickers + Status Dropdowns + Sorting -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 border-t border-white/5 items-end">
+      <!-- Date From -->
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">From Date</label>
+        <input 
+          type="date" 
+          id="date_from"
+          name="date_from" 
+          value="{{ date_from }}" 
+          {% if date_to %}max="{{ date_to }}"{% endif %}
+          onchange="validateDateRange()"
+          class="w-full bg-[#161c2d] border border-white/15 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-red-500"
+        >
+      </div>
+
+      <!-- Date To -->
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">To Date</label>
+        <input 
+          type="date" 
+          id="date_to"
+          name="date_to" 
+          value="{{ date_to }}" 
+          {% if date_from %}min="{{ date_from }}"{% endif %}
+          onchange="validateDateRange()"
+          class="w-full bg-[#161c2d] border border-white/15 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-red-500"
+        >
+      </div>
+
+      <!-- Fulfillment Status -->
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fulfillment</label>
+        <select name="status" class="w-full bg-[#161c2d] border border-white/15 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-red-500">
+          <option value="all">All Statuses</option>
+          {% for code, label in status_choices %}
+          <option value="{{ code }}" {% if current_status == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Payment Status -->
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Payment Status</label>
+        <select name="payment_status" class="w-full bg-[#161c2d] border border-white/15 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-red-500">
+          <option value="all">All Payments</option>
+          <option value="Pending" {% if current_payment_status == "Pending" %}selected{% endif %}>Pending</option>
+          <option value="Submitted / Under Verification" {% if current_payment_status == "Submitted / Under Verification" %}selected{% endif %}>Under Verification</option>
+          <option value="Paid" {% if current_payment_status == "Paid" %}selected{% endif %}>Paid</option>
+          <option value="Failed" {% if current_payment_status == "Failed" %}selected{% endif %}>Failed</option>
+        </select>
+      </div>
+
+      <!-- Sort By -->
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Sort By</label>
+        <select name="sort" class="w-full bg-[#161c2d] border border-white/15 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-red-500">
+          <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Newest First</option>
+          <option value="oldest" {% if current_sort == "oldest" %}selected{% endif %}>Oldest First</option>
+          <option value="highest" {% if current_sort == "highest" %}selected{% endif %}>Highest Amount</option>
+          <option value="lowest" {% if current_sort == "lowest" %}selected{% endif %}>Lowest Amount</option>
+        </select>
+      </div>
+
+      <!-- Apply Button -->
+      <div>
+        <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl py-2 px-3 text-xs font-bold transition shadow-md shadow-red-600/30">
+          Filter Results ⚡
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Orders List -->
 <div class="bg-[#111622] border border-white/10 rounded-3xl overflow-hidden shadow-2xl divide-y divide-white/5">
   {% for order in orders %}
-  <a href="{% url 'owner_order_detail' order.id %}" class="block p-5 hover:bg-[#161c2d] transition">
-    <div class="flex justify-between items-center">
+  <a href="{% url 'owner_order_detail' order.id %}" class="block p-5 sm:p-6 hover:bg-[#161c2d] transition group">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <b class="text-white text-base">#{{ order.id }} · {{ order.full_name }}</b>
-        <span class="block text-xs text-slate-400 mt-0.5">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+        <div class="flex items-center gap-2.5">
+          <b class="text-white text-base group-hover:text-red-400 transition">#{{ order.id }} · {{ order.full_name }}</b>
+          {% if order.courier_partner %}
+          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-500/30 font-medium">
+            🚚 {{ order.courier_partner }}
+          </span>
+          {% endif %}
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
+          <span>📅 {{ order.created_at|date:"d M Y, h:i A" }}</span>
+          <span>•</span>
+          <span>📞 {{ order.phone }}</span>
+          <span>•</span>
+          <span>📍 {{ order.city }}, {{ order.state }}</span>
+          {% if order.payment_reference %}
+          <span>•</span>
+          <span class="font-mono text-slate-300 bg-[#161c2d] px-2 py-0.5 rounded border border-white/10 text-[11px]">UTR: {{ order.payment_reference }}</span>
+          {% endif %}
+        </div>
       </div>
-      <div class="text-right">
-        <b class="text-white text-base block">₹{{ order.total|floatformat:0 }}</b>
-        <span class="inline-block text-[11px] px-2.5 py-0.5 rounded-full font-semibold mt-1 {% if order.payment_status == 'Paid' %}bg-emerald-950/60 text-emerald-400 border border-emerald-500/30{% else %}bg-amber-950/60 text-amber-400 border border-amber-500/30{% endif %}">
-          {{ order.status }} • {{ order.payment_status }}
-        </span>
+
+      <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+        <b class="text-white text-lg block">₹{{ order.total|floatformat:2 }}</b>
+        
+        <div class="flex items-center gap-2">
+          <!-- Fulfillment status pill -->
+          <span class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider
+            {% if order.status == 'delivered' %}bg-emerald-950/60 text-emerald-400 border border-emerald-500/30
+            {% elif order.status == 'shipped' %}bg-blue-950/60 text-blue-400 border border-blue-500/30
+            {% elif order.status == 'cancelled' %}bg-rose-950/60 text-rose-400 border border-rose-500/30
+            {% else %}bg-[#161c2d] text-slate-300 border border-white/10{% endif %}">
+            {{ order.get_status_display }}
+          </span>
+
+          <!-- Payment status pill -->
+          <span class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold
+            {% if order.payment_status == 'Paid' %}bg-emerald-950/60 text-emerald-400 border border-emerald-500/30
+            {% elif order.payment_status == 'Submitted / Under Verification' %}bg-amber-950/60 text-amber-400 border border-amber-500/30
+            {% elif order.payment_status == 'Failed' %}bg-rose-950/60 text-rose-400 border border-rose-500/30
+            {% else %}bg-[#161c2d] text-slate-400 border border-white/10{% endif %}">
+            {{ order.payment_status }}
+          </span>
+        </div>
       </div>
     </div>
   </a>
   {% empty %}
-  <p class="p-10 text-center text-slate-400">No orders placed yet.</p>
+  <div class="p-12 text-center text-slate-400 space-y-3">
+    <p class="text-3xl">📦</p>
+    <p class="text-base text-white font-medium">No orders matched your filter criteria.</p>
+    <p class="text-xs text-slate-500">Try adjusting your date range, search query, or status filters.</p>
+    <a href="{% url 'owner_orders' %}" class="inline-block bg-white/10 hover:bg-white/20 text-white rounded-full px-5 py-2 text-xs font-semibold transition mt-2">
+      Clear Filters
+    </a>
+  </div>
   {% endfor %}
 </div>
+
+<script>
+function validateDateRange() {
+  const fromInput = document.getElementById("date_from");
+  const toInput = document.getElementById("date_to");
+
+  if (fromInput.value) {
+    toInput.min = fromInput.value;
+  } else {
+    toInput.removeAttribute("min");
+  }
+
+  if (toInput.value) {
+    fromInput.max = toInput.value;
+  } else {
+    fromInput.removeAttribute("max");
+  }
+
+  if (fromInput.value && toInput.value && fromInput.value > toInput.value) {
+    alert("Warning: 'From Date' cannot be after 'To Date'. The date has been adjusted.");
+    toInput.value = fromInput.value;
+  }
+}
+</script>
 {% endblock %}

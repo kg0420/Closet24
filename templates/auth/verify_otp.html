@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Verify Email OTP — Follow Me Boutique{% endblock %}
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-md bg-[#111622] border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-red-950/40 relative overflow-hidden">
+        <div class="absolute -top-16 -right-16 w-36 h-36 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>✉️</span> Security Verification
+        </div>
+        <h1 class="display text-3xl sm:text-4xl text-white font-normal">Verify Email</h1>
+        <p class="text-xs text-slate-400 mt-2 font-medium leading-relaxed">
+            We have sent a 6-digit one-time password (OTP) to <span class="text-red-400 font-semibold">{{ email }}</span>. Please enter it below to complete your registration.
+        </p>
+
+        <form method="post" class="mt-8 space-y-5">
+            {% csrf_token %}
+            <div>
+                <label for="id_otp" class="block text-xs font-semibold tracking-wider text-slate-300 uppercase mb-2">
+                    Enter 6-Digit OTP
+                </label>
+                <input 
+                    type="text" 
+                    name="otp" 
+                    id="id_otp" 
+                    maxlength="6" 
+                    pattern="[0-9]{6}" 
+                    inputmode="numeric" 
+                    autocomplete="one-time-code"
+                    required 
+                    placeholder="• • • • • •" 
+                    class="w-full text-center tracking-[0.5em] text-2xl font-bold border border-white/15 rounded-2xl py-3 px-4 bg-[#161c2d] text-white focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-500"
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl py-3.5 font-semibold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 transition-all transform hover:-translate-y-0.5">
+                Verify & Create Account 🚀
+            </button>
+        </form>
+
+        <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-5">
+            <span>Didn't receive the email?</span>
+            <a href="{% url 'resend_registration_otp' %}" class="text-red-400 font-semibold hover:underline flex items-center gap-1">
+                <span>🔄</span> Resend OTP
+            </a>
+        </div>
+
+        <div class="mt-4 text-center text-xs text-slate-500">
+            Want to use another email? 
+            <a href="{% url 'register' %}" class="text-slate-400 hover:text-white underline ml-1">Change details</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

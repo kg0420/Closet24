@@ -26,8 +26,8 @@
                 <span class="italic font-normal gradient-text">Effortlessly.</span>
             </h1>
 
-            <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-lg">
-                Thoughtfully curated fits designed for modern adult men. Discover effortless denim jeans, relaxed oversized shirts, and stylish baggy fits crafted for your daily presence.
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-lg font-serif">
+                Stylish fits made for the modern man. Explore comfortable jeans, oversized shirts, and trendy baggy styles designed to keep you looking sharp and feeling confident every day.
             </p>
 
             <!-- Action Buttons -->
@@ -99,7 +99,7 @@
 </section>
 
 <!-- QUICK CATEGORY PILLS BAR -->
-<section class="max-w-7xl mx-auto px-5 lg:px-8 -mt-6 relative z-20">
+{% comment %} <section class="max-w-7xl mx-auto px-5 lg:px-8 -mt-6 relative z-20">
     <div class="bg-[#111622] rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/10 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
         <a href="{% url 'shop' %}" class="flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-500 hover:to-rose-500 transition duration-200 shrink-0 font-semibold text-xs shadow-md shadow-red-600/30">
             <span>✨</span> All Menswear
@@ -141,7 +141,7 @@
             {% endfor %}
         {% endfor %}
     </div>
-</section>
+</section> {% endcomment %}
 
 <!-- MID-PAGE STATEMENT BANNER (Obsidian Contrast with Red Glow) -->
 <section class="bg-gradient-to-r from-[#05070b] via-[#101625] to-[#05070b] text-white my-10 py-20 px-5 relative overflow-hidden border-y border-white/10">

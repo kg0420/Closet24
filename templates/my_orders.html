@@ -52,6 +52,24 @@
                         Ref / UTR: <span class="text-slate-200">{{ order.payment_reference }}</span>
                     </p>
                     {% endif %}
+
+                    {% if order.courier_partner or order.tracking_number %}
+                    <div class="mt-2 pt-2 border-t border-white/5 space-y-1">
+                        <p class="text-emerald-400 font-semibold flex items-center gap-1.5">
+                            <span>📦</span> Shipment Dispatched: {{ order.courier_partner|default:"Courier Service" }}
+                        </p>
+                        {% if order.tracking_number %}
+                        <p class="text-slate-300 font-mono text-[11px]">
+                            Tracking / AWB: <span class="text-white font-bold select-all">{{ order.tracking_number }}</span>
+                        </p>
+                        {% endif %}
+                        {% if order.tracking_url %}
+                        <a href="{{ order.tracking_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 underline font-semibold mt-0.5">
+                            <span>📍</span> Track Package Online →
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
