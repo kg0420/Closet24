@@ -21,6 +21,7 @@ urlpatterns = [
     path("payment/<int:order_id>/", views.payment_page, name="payment_page"),
     path("order/success/<int:order_id>/", views.order_success, name="order_success"),
     path("orders/", views.my_orders, name="my_orders"),
+    path("orders/<int:order_id>/cancel/", views.cancel_order, name="cancel_order"),
     path("order/<int:order_id>/receipt/", views.download_receipt, name="download_receipt"),
 
     # Owner / Admin Management Routes

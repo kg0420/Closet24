@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Category, Order, OrderItem, Product, ProductImage, Profile, ShopSettings
+from .models import Category, Order, OrderItem, Product, ProductImage, ProductSizeVariant, Profile, ShopSettings
+
+
+class ProductSizeVariantInline(admin.TabularInline):
+    model = ProductSizeVariant
+    extra = 1
 
 
 class ProductImageInline(admin.TabularInline):
@@ -13,7 +18,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ("category", "featured", "is_new")
     search_fields = ("name", "description")
     prepopulated_fields = {"slug": ("name",)}
-    inlines = [ProductImageInline]
+    inlines = [ProductSizeVariantInline, ProductImageInline]
 
 
 @admin.register(Category)

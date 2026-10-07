@@ -139,9 +139,36 @@ class Product(models.Model):
 
     @property
     def size_list(self):
+        if self.variants.exists():
+            return [v.size for v in self.variants.all()]
         if not self.sizes:
             return []
         return [s.strip() for s in self.sizes.split(",") if s.strip()]
+
+    @property
+    def has_variants(self):
+        return self.variants.exists()
+
+    @property
+    def variant_list(self):
+        return list(self.variants.all())
+
+    def get_variant_stock(self, size_name):
+        if not size_name:
+            return self.stock
+        variant = self.variants.filter(size__iexact=str(size_name).strip()).first()
+        if variant:
+            return variant.stock
+        return self.stock
+
+    def sync_variant_stock(self):
+        if self.variants.exists():
+            from django.db.models import Sum
+            total = self.variants.aggregate(total=Sum("stock"))["total"] or 0
+            self.stock = total
+            all_sizes = [v.size for v in self.variants.all()]
+            self.sizes = ",".join(all_sizes)
+            self.save(update_fields=["stock", "sizes"])
 
     @property
     def gst_amount(self):
@@ -244,3 +271,16 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.name}"
+
+
+class ProductSizeVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
+    size = models.CharField(max_length=20)
+    stock = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ("product", "size")
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.product.name} - Size {self.size} ({self.stock} in stock)"

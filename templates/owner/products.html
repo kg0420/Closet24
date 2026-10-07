@@ -73,13 +73,26 @@
           ₹{{ product.price|floatformat:2 }}
         </td>
         <td class="p-4">
-          {% if product.stock == 0 %}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/60 text-red-400 border border-red-500/30">Out of Stock</span>
-          {% elif product.stock <= 5 %}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-500/30">Low ({{ product.stock }})</span>
-          {% else %}
-          <span class="text-slate-300 font-medium">{{ product.stock }} units</span>
-          {% endif %}
+          <div class="space-y-1.5">
+            <div>
+              {% if product.stock == 0 %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-950/60 text-red-400 border border-red-500/30">Out of Stock</span>
+              {% elif product.stock <= 5 %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-500/30">Low ({{ product.stock }})</span>
+              {% else %}
+              <span class="text-slate-300 font-medium">{{ product.stock }} units</span>
+              {% endif %}
+            </div>
+            {% if product.variants.all %}
+            <div class="flex flex-wrap gap-1 max-w-[200px]">
+              {% for v in product.variants.all %}
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono {% if v.stock == 0 %}bg-red-500/10 text-red-400/70 line-through border border-red-500/20{% elif v.stock <= 2 %}bg-amber-500/15 text-amber-300 border border-amber-500/30{% else %}bg-[#161c2d] text-slate-300 border border-white/10{% endif %}" title="Size {{ v.size }}: {{ v.stock }} in stock">
+                {{ v.size }}: {{ v.stock }}
+              </span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
         </td>
         <td class="p-4 space-x-1">
           {% if product.featured %}<span class="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded font-medium">Featured</span>{% endif %}

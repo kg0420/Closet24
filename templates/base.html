@@ -86,15 +86,15 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#080b11] text-slate-100 antialiased selection:bg-red-900 selection:text-white">
+<body class="bg-[#080b11] text-slate-100 antialiased selection:bg-red-900 selection:text-white mx-0 px-0">
 
     <!-- Glassmorphism Floating Header -->
     <header class="sticky top-0 z-50 glass-header transition-all duration-200">
         <div class="max-w-7xl mx-auto px-5 lg:px-8 h-20 flex items-center justify-between">
             <!-- Boutique Logo -->
             <a href="{% url 'home' %}" class="group flex items-center gap-2">
-                <span class="display text-2xl lg:text-3xl font-bold tracking-tight text-white transition group-hover:opacity-90">
-                    Follow Me<span class="text-red-500 inline-block transition-transform duration-300 group-hover:scale-125">.</span>
+                <span class="display text-xl lg:text-3xl font-bold tracking-tight text-white transition group-hover:opacity-90">
+                    Follow Me Boutique<span class="text-red-500 inline-block transition-transform duration-300 group-hover:scale-125">.</span>
                 </span class="">
                 <span class="hidden sm:inline-block text-[10px] uppercase font-bold tracking-[.2em] bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-0.5 rounded-full ">
                     Men's Boutique ✨
@@ -105,13 +105,13 @@
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold tracking-tight">
                 <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'home' %}">Home</a>
                 <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'shop' %}">All Menswear 🛍️</a>
-                <a class="text-slate-300 hover:text-red-400 transition duration-150 flex items-center gap-1.5" href="{% url 'shop' %}?q=jeans">
+                <!-- <a class="text-slate-300 hover:text-red-400 transition duration-150 flex items-center gap-1.5" href="{% url 'shop' %}?q=jeans">
                     <span>👖</span> Jeans & Denim
                 </a>
                 <a class="text-slate-300 hover:text-red-400 transition duration-150 flex items-center gap-1.5" href="{% url 'shop' %}?q=shirt">
                     <span>👕</span> Shirts & Polos
                 </a>
-                <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'home' %}#about">Our Story</a>
+                <a class="text-slate-300 hover:text-red-400 transition duration-150" href="{% url 'home' %}#about">Our Story</a> -->
             </nav>
 
             <!-- Actions (Login, Orders, Bag) -->
@@ -155,10 +155,10 @@
             <div class="grid gap-3.5 text-sm font-semibold">
                 <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'home' %}">🏠 Home</a>
                 <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}">🛍️ All Menswear</a>
-                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?q=jeans">👖 Jeans & Denim Edit</a>
+                <!-- <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?q=jeans">👖 Jeans & Denim</a>
                 <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?q=shirt">👕 Shirts & Polos</a>
                 <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'shop' %}?sort=newest">✨ New In This Season</a>
-                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'home' %}#about">📖 About Follow Me</a>
+                <a class="py-1 text-slate-300 hover:text-red-400" href="{% url 'home' %}#about">📖 About Follow Me</a> -->
                 {% if user.is_authenticated and is_owner %}
                     <a class="py-1 text-red-400 font-bold" href="{% url 'owner_dashboard' %}">👑 Owner Management</a>
                 {% endif %}
@@ -183,18 +183,18 @@
 
     <!-- Luxury Dark Footer with Developer Badge -->
     <footer id="contact" class="bg-gradient-to-b from-[#080b11] via-[#05070b] to-[#020305] text-white mt-24 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 lg:py-20 grid md:grid-cols-4 gap-12">
+        <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 lg:py-5 grid md:grid-cols-4 gap-5">
             <div class="md:col-span-2 space-y-4">
                 <div class="display text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                    Follow Me<span class="text-red-500">.</span>
+                    Follow Me Boutique<span class="text-red-500">.</span>
                 </div>
-                <p class="text-slate-400 max-w-md leading-relaxed text-sm">
+                <!-- <p class="text-slate-400 max-w-md leading-relaxed text-sm">
                     Curated exclusively for adult men. Premium collections of designer denim jeans, casual & formal shirts, modern baggy fits, and tailored menswear essentials.
-                </p>
+                </p> -->
                 <div class="pt-2 flex flex-wrap gap-2 text-xs">
                     <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">👖 Premium Jeans</span>
                     <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">👕 100% Combed Cotton</span>
-                    <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">⚡ 1-Click UPI Payment</span>
+                    <!-- <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300">⚡ 1-Click UPI Payment</span> -->
                 </div>
             </div>
 
@@ -215,11 +215,11 @@
                     <a href="https://www.instagram.com/follow_me_boutique.55/" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
                         <span>📸</span> Instagram @follow_me
                     </a>
-                    <a href="https://wa.me/" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
-                        <span>💬</span> WhatsApp Direct Order
+                    <a href="https://wa.me/7387990992" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
+                        <span>💬</span> WhatsApp
                     </a>
-                    <span class="text-xs text-slate-500 pt-1">🕒 Store Hours: Mon–Sat · 10 AM–8 PM</span>
-                    <span class="text-xs text-slate-500">📍 Free Local Store Pickup Available</span>
+                    <!-- <span class="text-xs text-slate-500 pt-1">🕒 Store Hours: Mon–Sat · 10 AM–8 PM</span>
+                    <span class="text-xs text-slate-500">📍 Free Local Store Pickup Available</span> -->
                 </div>
             </div>
         </div>
@@ -232,7 +232,9 @@
                 </div>
                 <div class="flex items-center gap-2 font-medium bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/30 text-slate-300 hover:border-red-500 transition">
                     <span>✨</span>
-                    <span>Designed & Crafted with <span class="text-red-500 font-bold">♥</span> by Developer</span>
+                    <span>Designed & Developed By <span class="text-red-500 font-bold">♥</span>
+                    <a href="https://wa.me/7219570360" target="_blank" class="font-bold text-red">
+                     Krish Gupta</span></a>
                     <span>🚀</span>
                 </div>
             </div>

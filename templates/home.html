@@ -13,12 +13,12 @@
         <!-- Left: Headline & Actions -->
         <div class="max-w-xl space-y-6">
             <!-- Pulsing New Season Badge -->
-            <div class="inline-flex items-center gap-2 bg-[#111622]/90 border border-red-500/30 px-4 py-1.5 rounded-full shadow-lg shadow-red-950/40">
+            <!-- <div class="inline-flex items-center gap-2 bg-[#111622]/90 border border-red-500/30 px-4 py-1.5 rounded-full shadow-lg shadow-red-950/40">
                 <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                 <span class="w-2 h-2 rounded-full bg-red-500 -ml-4"></span>
                 <span class="text-xs font-bold tracking-widest uppercase text-red-400">Men's Adult Drop · 2026</span>
                 <span class="text-xs">✨</span>
-            </div>
+            </div> -->
 
             <!-- Big Display Headline -->
             <h1 class="display text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.02] tracking-tight text-white">
@@ -144,8 +144,7 @@
 </section> {% endcomment %}
 
 <!-- MID-PAGE STATEMENT BANNER (Obsidian Contrast with Red Glow) -->
-<section class="bg-gradient-to-r from-[#05070b] via-[#101625] to-[#05070b] text-white my-10 py-20 px-5 relative overflow-hidden border-y border-white/10">
-    <!-- Starry glow accents -->
+<!-- <section class="bg-gradient-to-r from-[#05070b] via-[#101625] to-[#05070b] text-white my-10 py-20 px-5 relative overflow-hidden border-y border-white/10">
     <div class="absolute -top-24 -left-24 w-80 h-80 bg-red-600/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-red-900/20 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -171,7 +170,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- JUST DROPPED / NEW ARRIVALS -->
 <section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
@@ -186,7 +185,7 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
         {% for product in new_arrivals %}
             {% include "partials/product_card.html" with product=product %}
         {% empty %}
@@ -210,8 +209,8 @@
             <h2 class="display text-4xl sm:text-5xl font-bold leading-tight text-white">
                 Made for your<br><span class="italic font-normal gradient-text">everyday moment.</span>
             </h2>
-            <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
-                Follow Me Boutique was born from a passion for authentic adult men's styling. Rather than overwhelming you with endless fast-fashion rows, we provide small intentional edits of denim jeans 👖, stylish shirts 👕, and elevated menswear essentials.
+            <p class="font-serif text-slate-300 leading-relaxed  text-sm sm:text-base">
+                Follow Me Boutique was born from a passion for child as well as authentic adult men's styling. Rather than overwhelming you with endless fast-fashion rows, we provide small intentional edits of denim jeans 👖, stylish shirts 👕, and elevated menswear essentials.
             </p>
             <div class="pt-2">
                 <a href="{% url 'shop' %}" class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-7 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition shadow-lg shadow-red-600/30">
@@ -237,7 +236,7 @@
                 👖
             </div>
             <h3 class="display text-2xl font-bold text-white">Curated Edits</h3>
-            <p class="text-slate-400 text-sm leading-relaxed">
+            <p class="font-serif text-slate-400 text-sm leading-relaxed">
                 Small, deliberate drops instead of endless scrolling. Every pair of jeans and shirt is handpicked for men's fit, durability, and comfort.
             </p>
         </div>
@@ -248,7 +247,7 @@
                 👕
             </div>
             <h3 class="display text-2xl font-bold text-white">Personal Attention</h3>
-            <p class="text-slate-400 text-sm leading-relaxed">
+            <p class="font-serif text-slate-400 text-sm leading-relaxed">
                 A warm boutique experience with human attention. Message us on WhatsApp or Instagram for sizing help and styling advice.
             </p>
         </div>
@@ -259,7 +258,7 @@
                 ⚡
             </div>
             <h3 class="display text-2xl font-bold text-white">1-Click Fast Pay</h3>
-            <p class="text-slate-400 text-sm leading-relaxed">
+            <p class="font-serif text-slate-400 text-sm leading-relaxed">
                 Scan and pay instantly using Google Pay, PhonePe, or Paytm with automatic order tracking and fast local store pickup.
             </p>
         </div>

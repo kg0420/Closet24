@@ -78,13 +78,21 @@
                         <span>📄</span> Download Tax Invoice
                     </a>
                     {% else %}
+                    {% if order.status != 'cancelled' %}
                     <a href="{% url 'payment_page' order.id %}" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2 rounded-full text-xs font-semibold transition shadow-md shadow-red-600/30">
                         <span>💳</span> Pay / Enter UTR →
                     </a>
-                    <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-[#161c2d] border border-white/10 px-3 py-2 rounded-xl">
-                        <span>🔒</span>
-                        <span>Invoice unlocks upon verification</span>
-                    </div>
+                    <form method="post" action="{% url 'cancel_order' order.id %}" class="inline-block" onsubmit="return confirm('Are you sure you want to cancel Order #{{ order.id }}? Any reserved items will be released.');">
+                        {% csrf_token %}
+                        <button type="submit" class="inline-flex items-center gap-1 text-xs text-rose-400 hover:text-rose-300 hover:underline px-2.5 py-1.5 rounded-lg font-medium transition">
+                            ✕ Cancel Order
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-xs text-rose-400 font-medium px-3 py-1 bg-rose-950/40 border border-rose-500/20 rounded-full">
+                        ✕ Order Cancelled
+                    </span>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>

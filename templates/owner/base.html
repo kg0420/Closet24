@@ -29,15 +29,15 @@
 
       <section class="flex-1 min-w-0">
         <div class="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-5 text-sm scrollbar-none">
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_dashboard' %}">Dashboard</a>
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_products' %}">Products</a>
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_categories' %}">Categories</a>
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_orders' %}">Orders</a>
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_customers' %}">Customers</a>
-          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_settings' %}">Payment</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_dashboard' %}"><span>🏠</span> Dashboard</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_products' %}"><span>👕</span> Products</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_categories' %}"><span>🏷️</span> Categories</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_orders' %}"><span>🧾</span> Orders</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_customers' %}"><span>👥</span> Customers & Roles</a>
+          <a class="bg-[#111622] border border-white/10 text-slate-200 rounded-xl px-4 py-2 whitespace-nowrap" href="{% url 'owner_settings' %}"><span>💳</span> Payment Settings</a>
           <a class="bg-red-500/15 text-red-400 border border-red-500/30 rounded-xl px-4 py-2 whitespace-nowrap font-medium" href="/admin/" target="_blank">⚙️ Django Admin ↗</a>
         </div>
-        {% block owner_content %}{% endblock %}
+        {% block owner_content %}{% endblock %} 
       </section>
     </div>
   </div>

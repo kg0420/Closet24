@@ -6,7 +6,7 @@
   <h1 class="display text-4xl mt-3 text-white">{{ heading }}</h1>
   <p class="text-slate-400 mt-1.5 text-sm">Fill in the product details and upload multiple photos below.</p>
 
-  <form method="post" enctype="multipart/form-data" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-8 mt-6 space-y-6 shadow-2xl">
+  <form id="productForm" method="post" enctype="multipart/form-data" class="bg-[#111622] border border-white/10 rounded-3xl p-6 sm:p-8 mt-6 space-y-6 shadow-2xl">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -50,23 +50,88 @@
         {% if form.compare_at_price.errors %}<p class="text-red-400 text-xs mt-1">{{ form.compare_at_price.errors|striptags }}</p>{% endif %}
       </div>
 
-      <!-- Stock Quantity -->
-      <div>
-        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
-          Stock Quantity <span class="text-red-500">*</span>
-        </label>
-        {{ form.stock }}
-        {% if form.stock.errors %}<p class="text-red-400 text-xs mt-1">{{ form.stock.errors|striptags }}</p>{% endif %}
+      <!-- SIZING & INVENTORY MANAGEMENT (Alpha vs Numeric) -->
+      <div class="sm:col-span-2 bg-[#161c2d] border border-white/10 rounded-2xl p-5 space-y-4">
+        <div>
+          <div class="flex items-center justify-between">
+            <label class="block text-xs uppercase tracking-widest text-red-400 font-bold">
+              📏 Sizing Standard & Stock Per Size
+            </label>
+            <span class="text-xs text-slate-300">Total Product Stock: <b id="totalStockBadge" class="text-white bg-red-600/30 px-2.5 py-0.5 rounded-full border border-red-500/40 text-xs">0 units</b></span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Select the sizing standard for this item. Check the available sizes and enter the exact inventory quantity for each size.</p>
+        </div>
+
+        <!-- 2 Sizing Category Checkboxes -->
+        <div class="grid sm:grid-cols-2 gap-3 pt-1">
+          <label class="flex items-start gap-3 p-3.5 rounded-xl border border-white/15 bg-[#111622] hover:border-red-500/50 cursor-pointer transition select-none">
+            <input type="checkbox" id="toggleAlphaSizes" class="mt-0.5" onchange="toggleSizeSections()">
+            <div>
+              <span class="text-xs font-bold text-white block">👕 Shirts, Kurta & T-Shirts (Alpha Sizes)</span>
+              <span class="text-[11px] text-slate-400">Available in S, M, L, XL, XXL, 3XL</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-3 p-3.5 rounded-xl border border-white/15 bg-[#111622] hover:border-red-500/50 cursor-pointer transition select-none">
+            <input type="checkbox" id="toggleNumericSizes" class="mt-0.5" onchange="toggleSizeSections()">
+            <div>
+              <span class="text-xs font-bold text-white block">👖 Jeans, Pants & Trousers (Waist Numbers)</span>
+              <span class="text-[11px] text-slate-400">Available in 28, 30, 32, 34, 36, 38, 40</span>
+            </div>
+          </label>
+        </div>
+
+        <input type="hidden" name="variants_submitted" value="1">
+
+        <!-- Alpha Sizes Grid (Shirts/Kurta) -->
+        <div id="alphaSection" class="hidden pt-4 border-t border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-bold text-slate-200">Alpha Sizing (Shirts / Kurta / Tops):</p>
+            <button type="button" onclick="toggleAllSizes('alpha')" class="text-[11px] text-red-400 hover:text-red-300 underline font-semibold">Toggle All</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            {% for s in alpha_sizes %}
+            <div class="bg-[#111622] border border-white/10 rounded-xl p-3 space-y-2 hover:border-white/20 transition">
+              <label class="flex items-center justify-between text-xs font-bold text-white cursor-pointer">
+                <span>Size {{ s }}</span>
+                <input type="checkbox" name="selected_sizes" value="{{ s }}" class="size-checkbox alpha-checkbox" id="check_{{ s }}" onchange="updateTotalStock()">
+              </label>
+              <div class="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                <span class="text-[10px] text-slate-400 font-medium">Qty:</span>
+                <input type="number" name="size_qty_{{ s }}" id="qty_{{ s }}" min="0" value="0" class="size-qty-input w-full bg-[#161c2d] border border-white/15 rounded-lg px-2 py-1 text-xs text-white text-center font-bold" oninput="updateTotalStock()">
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Numeric Sizes Grid (Jeans/Pants) -->
+        <div id="numericSection" class="hidden pt-4 border-t border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-bold text-slate-200">Waist Sizing (Jeans / Trousers / Cargo):</p>
+            <button type="button" onclick="toggleAllSizes('numeric')" class="text-[11px] text-red-400 hover:text-red-300 underline font-semibold">Toggle All</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2.5">
+            {% for s in numeric_sizes %}
+            <div class="bg-[#111622] border border-white/10 rounded-xl p-3 space-y-2 hover:border-white/20 transition">
+              <label class="flex items-center justify-between text-xs font-bold text-white cursor-pointer">
+                <span>{{ s }} inch</span>
+                <input type="checkbox" name="selected_sizes" value="{{ s }}" class="size-checkbox numeric-checkbox" id="check_{{ s }}" onchange="updateTotalStock()">
+              </label>
+              <div class="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                <span class="text-[10px] text-slate-400 font-medium">Qty:</span>
+                <input type="number" name="size_qty_{{ s }}" id="qty_{{ s }}" min="0" value="0" class="size-qty-input w-full bg-[#161c2d] border border-white/15 rounded-lg px-2 py-1 text-xs text-white text-center font-bold" oninput="updateTotalStock()">
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
 
-      <!-- Sizes -->
-      <div class="sm:col-span-2">
-        <label class="block text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">
-          Available Sizes (comma-separated)
-        </label>
+      <!-- Auto-populated Total Stock & Sizes -->
+      <div class="hidden">
+        {{ form.stock }}
         {{ form.sizes }}
-        <p class="text-[11px] text-slate-500 mt-1">e.g. 28, 30, 32, 34 or S, M, L, XL</p>
-        {% if form.sizes.errors %}<p class="text-red-400 text-xs mt-1">{{ form.sizes.errors|striptags }}</p>{% endif %}
       </div>
 
       <!-- Description -->
@@ -154,7 +219,7 @@
         {% if g.display_url %}
         <div class="relative group rounded-xl overflow-hidden border border-white/10 aspect-[3/4] bg-[#090d16]">
           <img src="{{ g.display_url }}" class="w-full h-full object-cover" alt="Gallery photo">
-          <button type="submit" formaction="{% url 'owner_product_delete_gallery_image' g.id %}" onclick="return confirm('Remove this photo from gallery?');"
+          <button type="submit" form="delete-gallery-form-{{ g.id }}" onclick="return confirm('Remove this photo from gallery?');"
             class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-90 group-hover:opacity-100 transition shadow">
             ✕
           </button>
@@ -167,7 +232,7 @@
 
     <!-- Action Buttons -->
     <div class="flex items-center gap-4 pt-6 border-t border-white/10">
-      <button type="submit" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-bold shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
+      <button type="submit" form="productForm" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full px-8 py-3.5 text-sm font-bold shadow-xl shadow-red-600/35 transition transform hover:-translate-y-0.5">
         {{ button }}
       </button>
       <a href="{% url 'owner_products' %}" class="text-xs text-slate-400 hover:text-white font-medium underline">
@@ -175,31 +240,129 @@
       </a>
     </div>
   </form>
+
+  {% if product and product.gallery_images.all %}
+  <!-- Dedicated gallery deletion forms outside the main form to protect unsubmitted product edits -->
+  {% for g in product.gallery_images.all %}
+  <form id="delete-gallery-form-{{ g.id }}" method="post" action="{% url 'owner_product_delete_gallery_image' g.id %}" class="hidden">
+    {% csrf_token %}
+  </form>
+  {% endfor %}
+  {% endif %}
 </div>
 
-<style>
-  input, textarea, select {
-    width: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background-color: #161c2d;
-    color: #ffffff;
-    border-radius: 1rem;
-    padding: 0.85rem 1rem;
-    font-size: 0.875rem;
-    outline: none;
-    transition: all 0.15s ease;
+{{ variant_map|json_script:"existing-variants-data" }}
+<script>
+  function toggleSizeSections() {
+    const alphaToggle = document.getElementById('toggleAlphaSizes');
+    const numericToggle = document.getElementById('toggleNumericSizes');
+    const alphaSection = document.getElementById('alphaSection');
+    const numericSection = document.getElementById('numericSection');
+
+    if (alphaToggle.checked) {
+      alphaSection.classList.remove('hidden');
+    } else {
+      alphaSection.classList.add('hidden');
+      alphaSection.querySelectorAll('.size-checkbox').forEach(cb => cb.checked = false);
+      alphaSection.querySelectorAll('.size-qty-input').forEach(inp => inp.value = 0);
+    }
+
+    if (numericToggle.checked) {
+      numericSection.classList.remove('hidden');
+    } else {
+      numericSection.classList.add('hidden');
+      numericSection.querySelectorAll('.size-checkbox').forEach(cb => cb.checked = false);
+      numericSection.querySelectorAll('.size-qty-input').forEach(inp => inp.value = 0);
+    }
+
+    updateTotalStock();
   }
-  input:focus, textarea:focus, select:focus {
-    background-color: #1a2236;
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+
+  function toggleAllSizes(type) {
+    const section = type === 'alpha' ? document.getElementById('alphaSection') : document.getElementById('numericSection');
+    const checkboxes = section.querySelectorAll('.size-checkbox');
+    const allChecked = Array.from(checkboxes).every(c => c.checked);
+    checkboxes.forEach(cb => {
+      cb.checked = !allChecked;
+      const qtyInput = document.getElementById(`qty_${cb.value}`);
+      if (cb.checked && qtyInput && parseInt(qtyInput.value || 0) === 0) {
+        qtyInput.value = 5; // Default starter quantity
+      }
+    });
+    updateTotalStock();
   }
-  input[type=checkbox] {
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: #ef4444;
-    cursor: pointer;
-    border-radius: 0.35rem;
+
+  function updateTotalStock() {
+    let total = 0;
+    const activeSizes = [];
+    const checkedBoxes = document.querySelectorAll('.size-checkbox:checked');
+
+    checkedBoxes.forEach(cb => {
+      const s = cb.value;
+      activeSizes.push(s);
+      const qtyInput = document.getElementById(`qty_${s}`);
+      const val = parseInt(qtyInput ? qtyInput.value : 0) || 0;
+      total += val;
+    });
+
+    const badge = document.getElementById('totalStockBadge');
+    if (badge) {
+      badge.textContent = `${total} unit${total === 1 ? '' : 's'}`;
+    }
+
+    // Synchronize hidden Django form fields
+    const formStockInput = document.querySelector('input[name="stock"]');
+    if (formStockInput) {
+      formStockInput.value = total;
+    }
+
+    const formSizesInput = document.querySelector('input[name="sizes"]');
+    if (formSizesInput) {
+      formSizesInput.value = activeSizes.join(',');
+    }
   }
-</style>
+
+  // Pre-populate sizes when editing an existing product
+  document.addEventListener('DOMContentLoaded', () => {
+    const rawData = document.getElementById('existing-variants-data')?.textContent;
+    let variants = {};
+    try {
+      variants = rawData ? JSON.parse(rawData) : {};
+    } catch (e) {
+      variants = {};
+    }
+
+    const alphaKeys = ["S", "M", "L", "XL", "XXL", "3XL"];
+    const numericKeys = ["28", "30", "32", "34", "36", "38", "40"];
+    let hasAlpha = false;
+    let hasNumeric = false;
+
+    Object.keys(variants).forEach(s => {
+      const qty = variants[s];
+      const cb = document.getElementById(`check_${s}`);
+      const qtyInp = document.getElementById(`qty_${s}`);
+      if (cb) {
+        cb.checked = true;
+        if (alphaKeys.includes(s)) hasAlpha = true;
+        if (numericKeys.includes(s)) hasNumeric = true;
+      }
+      if (qtyInp) {
+        qtyInp.value = qty;
+      }
+    });
+
+    const toggleAlpha = document.getElementById('toggleAlphaSizes');
+    const toggleNum = document.getElementById('toggleNumericSizes');
+
+    if (hasAlpha && toggleAlpha) toggleAlpha.checked = true;
+    if (hasNumeric && toggleNum) toggleNum.checked = true;
+
+    // If new product and neither checked yet, default Tops/Alpha to checked
+    if (!hasAlpha && !hasNumeric && toggleAlpha && toggleNum) {
+      toggleAlpha.checked = true;
+    }
+
+    toggleSizeSections();
+  });
+</script>
 {% endblock %}

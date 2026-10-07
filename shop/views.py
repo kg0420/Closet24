@@ -5,11 +5,12 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
 from django.utils.text import slugify
 from datetime import datetime, time as dtime
+from collections import defaultdict
 import random
 import time
 from django.utils import timezone
@@ -17,7 +18,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from .forms import CategoryForm, CheckoutForm, ProductForm, RegisterForm
-from .models import Category, Order, OrderItem, Product, Profile, ShopSettings, ProductImage
+from .models import Category, Order, OrderItem, Product, Profile, ShopSettings, ProductImage, ProductSizeVariant
 
 
 def is_owner_or_staff(user):
@@ -82,21 +83,42 @@ def _cart(request):
 
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    size = request.POST.get("size", "")
-    quantity = max(int(request.POST.get("quantity", 1)), 1)
+    size = request.POST.get("size", "").strip()
+    try:
+        quantity = max(int(request.POST.get("quantity", 1)), 1)
+    except (ValueError, TypeError):
+        quantity = 1
 
-    if quantity > product.stock:
-        messages.error(request, "Only limited stock is available.")
+    # Check size-specific stock if variants exist
+    available_stock = product.stock
+    if product.variants.exists():
+        if size:
+            variant = product.variants.filter(size__iexact=size).first()
+            if variant:
+                available_stock = variant.stock
+            else:
+                messages.error(request, f"Selected size '{size}' is not available for {product.name}.")
+                return redirect("product_detail", slug=product.slug)
+        else:
+            messages.error(request, "Please choose an available size before adding to your bag.")
+            return redirect("product_detail", slug=product.slug)
+
+    if available_stock <= 0:
+        messages.error(request, f"Size '{size or 'One Size'}' for {product.name} is currently out of stock.")
+        return redirect("product_detail", slug=product.slug)
+
+    if quantity > available_stock:
+        messages.error(request, f"Only {available_stock} item(s) available in size {size}.")
         return redirect("product_detail", slug=product.slug)
 
     cart = _cart(request)
     key = f"{product.id}:{size}"
-    current = cart.get(key, {"product_id": product.id, "size": size,"quantity": 0})
+    current = cart.get(key, {"product_id": product.id, "size": size, "quantity": 0})
     current["quantity"] += quantity
-    current["quantity"] = min(current["quantity"], product.stock)
+    current["quantity"] = min(current["quantity"], available_stock)
     cart[key] = current
     request.session.modified = True
-    messages.success(request, f"{product.name} added to your bag.")
+    messages.success(request, f"{product.name} (Size: {size or 'Free Size'}) added to your bag.")
     return redirect(request.POST.get("next", "cart"))
 
 
@@ -104,34 +126,31 @@ def cart(request):
     cart_data = _cart(request)
     items = []
     subtotal = Decimal("0")
-    # total_tax = Decimal("0")
 
     for key, item in cart_data.items():
         product = Product.objects.filter(id=item["product_id"]).first()
         if not product:
             continue
         item_subtotal = product.price * item["quantity"]
-        # item_tax = (item_subtotal * (product.gst_rate /Decimal("100"))).quantize(Decimal("0.01"))
-
         subtotal += item_subtotal
-        # total_tax += item_tax
+        size_name = item.get("size", "")
+        size_stock = product.get_variant_stock(size_name)
 
         items.append({
             "key": key,
             "product": product,
-            "size": item.get("size", ""),
+            "size": size_name,
             "quantity": item["quantity"],
+            "max_stock": size_stock,
             "subtotal": item_subtotal,
             "gst_rate": product.gst_rate,
-            # "gst_amount": item_tax,
-            "item_total": item_subtotal ,
+            "item_total": item_subtotal,
         })
 
     grand_total = subtotal 
     return render(request, "cart.html", {
         "items": items,
         "subtotal": subtotal,
-        # "total_tax": total_tax,
         "total": grand_total,
     })
 
@@ -139,10 +158,14 @@ def cart(request):
 def update_cart(request, key):
     cart_data = _cart(request)
     if key in cart_data:
-        quantity = max(int(request.POST.get("quantity", 1)), 1)
-        product = get_object_or_404(Product,
-id=cart_data[key]["product_id"])
-        cart_data[key]["quantity"] = min(quantity, product.stock)
+        try:
+            quantity = max(int(request.POST.get("quantity", 1)), 1)
+        except (ValueError, TypeError):
+            quantity = 1
+        product = get_object_or_404(Product, id=cart_data[key]["product_id"])
+        size_name = cart_data[key].get("size", "")
+        max_stock = product.get_variant_stock(size_name)
+        cart_data[key]["quantity"] = min(quantity, max_stock)
         request.session.modified = True
     return redirect("cart")
 
@@ -182,25 +205,37 @@ def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data.get("email")
+            username = form.cleaned_data.get("username")
+
+            # Clean up any abandoned/unverified inactive accounts matching this username or email
+            User.objects.filter(is_active=False).filter(Q(username=username) | Q(email__iexact=email)).delete()
+
+            # Create inactive user with securely hashed password
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
             # Generate 6-digit OTP
             otp_code = f"{random.randint(100000, 999999)}"
-            email = form.cleaned_data.get("email")
 
             try:
                 _send_otp_email(email, otp_code)
             except Exception as e:
+                user.delete()
                 messages.error(
                     request,
                     f"Unable to send verification email. Please check your email address or SMTP configuration: {e}"
                 )
                 return render(request, "auth/register.html", {"form": form, "next": next_url})
 
-            # Store sanitized form registration data & OTP timestamp in session
+            # Store only user ID, email, and OTP metadata (no plaintext passwords)
             request.session["pending_registration"] = {
-                "post_data": request.POST.dict(),
+                "user_id": user.id,
                 "email": email,
                 "otp": otp_code,
                 "expires_at": int(time.time()) + 600,  # 10 minutes
+                "attempts": 0,
                 "next": next_url,
             }
             request.session.modified = True
@@ -223,38 +258,59 @@ def verify_registration_otp(request):
 
     next_url = pending.get("next", "home")
     email = pending.get("email", "")
+    user_id = pending.get("user_id")
 
     if request.method == "POST":
         submitted_otp = request.POST.get("otp", "").strip()
         expected_otp = pending.get("otp", "")
         expires_at = pending.get("expires_at", 0)
+        attempts = pending.get("attempts", 0)
 
-        if int(time.time()) > expires_at:
-            messages.error(request, "The verification code has expired. Please request a new code.")
-            return render(request, "auth/verify_otp.html", {"email": email})
-
-        if submitted_otp != expected_otp:
-            messages.error(request, "Invalid verification code. Please check and try again.")
-            return render(request, "auth/verify_otp.html", {"email": email})
-
-        # OTP is valid, proceed with creating user account
-        post_data = pending.get("post_data", {})
-        form = RegisterForm(post_data)
-        if form.is_valid():
-            user = form.save()
-            Profile.objects.create(user=user, role="customer")
-
-            # Clean session
+        # Brute-force safeguard: Maximum 5 attempts
+        if attempts >= 5:
+            if user_id:
+                User.objects.filter(id=user_id, is_active=False).delete()
             request.session.pop("pending_registration", None)
             request.session.modified = True
-
-            login(request, user)
-            messages.success(request, "Account verified and created successfully! Welcome to Follow Me Boutique.")
-            return redirect(next_url)
-        else:
-            errors = " ".join([f"{f}: {e[0]}" for f, e in form.errors.items()])
-            messages.error(request, f"Could not create account: {errors}")
+            messages.error(request, "Too many failed attempts. For security, please sign up again.")
             return redirect("register")
+
+        # Expiration safeguard: 10 minutes
+        if int(time.time()) > expires_at:
+            if user_id:
+                User.objects.filter(id=user_id, is_active=False).delete()
+            request.session.pop("pending_registration", None)
+            request.session.modified = True
+            messages.error(request, "The verification code has expired. Please sign up again.")
+            return redirect("register")
+
+        if submitted_otp != expected_otp:
+            pending["attempts"] = attempts + 1
+            request.session["pending_registration"] = pending
+            request.session.modified = True
+            remaining = 5 - pending["attempts"]
+            messages.error(request, f"Invalid verification code. {remaining} attempt(s) remaining.")
+            return render(request, "auth/verify_otp.html", {"email": email})
+
+        # OTP is valid, activate account
+        user = User.objects.filter(id=user_id, is_active=False).first()
+        if not user:
+            request.session.pop("pending_registration", None)
+            request.session.modified = True
+            messages.error(request, "Registration session expired. Please sign up again.")
+            return redirect("register")
+
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+        Profile.objects.get_or_create(user=user, defaults={"role": "customer"})
+
+        # Clean session
+        request.session.pop("pending_registration", None)
+        request.session.modified = True
+
+        login(request, user)
+        messages.success(request, "Account verified successfully! Welcome to Follow Me Boutique.")
+        return redirect(next_url)
 
     return render(request, "auth/verify_otp.html", {"email": email})
 
@@ -272,6 +328,7 @@ def resend_registration_otp(request):
         _send_otp_email(email, otp_code)
         pending["otp"] = otp_code
         pending["expires_at"] = int(time.time()) + 600
+        pending["attempts"] = 0  # reset attempt counter for fresh code
         request.session["pending_registration"] = pending
         request.session.modified = True
         messages.success(request, f"A new verification code has been sent to {email}.")
@@ -310,7 +367,6 @@ def checkout(request):
 
     items = []
     subtotal = Decimal("0")
-    # total_tax = Decimal("0")
 
     for key, item in cart_data.items():
         product = get_object_or_404(Product, id=item["product_id"])
@@ -319,40 +375,85 @@ def checkout(request):
         subtotal += item_sub
         items.append((key, product, item, item_sub, item_tax))
 
-    grand_total = subtotal 
+    grand_total = subtotal
 
     if request.method == "POST":
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            order = form.save(commit=False)
-            order.user = request.user
-            order.subtotal = subtotal
-            order.total_tax = Decimal("0.00")
-            order.cgst = Decimal("0.00")
-            order.sgst = Decimal("0.00")
-            order.igst = Decimal("0.00")
-            order.total = grand_total
-
-            # Pre-validate stock for ALL items before modifying database
+            # Aggregate required quantity per (product, size)
+            variant_qty_needed = defaultdict(int)
             for key, product, item, item_sub, item_tax in items:
-                if product.stock < item["quantity"]:
-                    messages.error(request, f"{product.name} is no longer available in that quantity.")
+                size_str = item.get("size", "").strip()
+                variant_qty_needed[(product.id, size_str)] += item["quantity"]
+
+            # Pre-validate each variant / product stock
+            for (pid, size_str), needed in variant_qty_needed.items():
+                prod = Product.objects.filter(id=pid).first()
+                if not prod:
+                    continue
+                avail = prod.get_variant_stock(size_str)
+                if avail < needed:
+                    size_label = f" in size {size_str}" if size_str else ""
+                    messages.error(
+                        request,
+                        f"'{prod.name}'{size_label} has only {avail} unit(s) remaining in stock. Please adjust your bag."
+                    )
                     return redirect("cart")
 
             with transaction.atomic():
+                # Concurrency safeguard: lock product rows and variant rows
+                p_ids = list({pid for pid, _ in variant_qty_needed.keys()})
+                locked_products = {
+                    p.id: p
+                    for p in Product.objects.select_for_update().filter(id__in=p_ids)
+                }
+                locked_variants = {
+                    (v.product_id, v.size): v
+                    for v in ProductSizeVariant.objects.select_for_update().filter(product_id__in=p_ids)
+                }
+
+                # Re-verify stock with locked rows
+                for (pid, size_str), needed in variant_qty_needed.items():
+                    locked_p = locked_products.get(pid)
+                    var = locked_variants.get((pid, size_str))
+                    avail = var.stock if var else (locked_p.stock if locked_p else 0)
+                    if avail < needed:
+                        size_label = f" in size {size_str}" if size_str else ""
+                        messages.error(
+                            request,
+                            f"Sorry, '{locked_p.name}'{size_label} only has {avail} unit(s) available. Please review your cart."
+                        )
+                        return redirect("cart")
+
+                order = form.save(commit=False)
+                order.user = request.user
+                order.subtotal = subtotal
+                order.total_tax = Decimal("0.00")
+                order.cgst = Decimal("0.00")
+                order.sgst = Decimal("0.00")
+                order.igst = Decimal("0.00")
+                order.total = grand_total
                 order.save()
+
                 for key, product, item, item_sub, item_tax in items:
+                    locked_p = locked_products[product.id]
+                    size_str = item.get("size", "").strip()
+                    var = locked_variants.get((product.id, size_str))
+                    if var:
+                        var.stock = max(0, var.stock - item["quantity"])
+                        var.save(update_fields=["stock"])
+
                     OrderItem.objects.create(
                         order=order,
-                        product=product,
-                        size=item.get("size", ""),
+                        product=locked_p,
+                        size=size_str,
                         quantity=item["quantity"],
-                        price=product.price,
+                        price=locked_p.price,
                         gst_rate=Decimal("0.00"),
                         gst_amount=Decimal("0.00"),
                     )
-                    product.stock -= item["quantity"]
-                    product.save(update_fields=["stock"])
+                    locked_p.stock = max(0, locked_p.stock - item["quantity"])
+                    locked_p.save(update_fields=["stock"])
 
             request.session["cart"] = {}
             request.session.modified = True
@@ -368,9 +469,42 @@ def checkout(request):
         "form": form,
         "items": items,
         "subtotal": subtotal,
-        # "total_tax": total_tax,
         "total": grand_total,
     })
+
+
+@login_required
+def cancel_order(request, order_id):
+    """Allows customers to cancel their pending/unpaid placed orders and instantly releases reserved stock."""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.method == "POST":
+        if order.status == "cancelled":
+            messages.info(request, f"Order #{order.id} is already cancelled.")
+            return redirect("my_orders")
+
+        if order.status not in ["placed", "confirmed"] or order.payment_status.strip().lower() == "paid":
+            messages.error(
+                request,
+                f"Order #{order.id} cannot be cancelled as it is already paid, packed, or in transit. Please contact store support."
+            )
+            return redirect("my_orders")
+
+        with transaction.atomic():
+            order.status = "cancelled"
+            if not order.stock_restored:
+                for item in order.items.select_related("product"):
+                    if item.size:
+                        var = ProductSizeVariant.objects.filter(product=item.product, size=item.size).first()
+                        if var:
+                            var.stock += item.quantity
+                            var.save(update_fields=["stock"])
+                    item.product.stock += item.quantity
+                    item.product.save(update_fields=["stock"])
+                order.stock_restored = True
+            order.save()
+
+        messages.success(request, f"Order #{order.id} has been cancelled and reserved items were restored.")
+    return redirect("my_orders")
 
 
 @login_required
@@ -500,7 +634,7 @@ def owner_required(view_func):
 @owner_required
 def owner_dashboard(request):
     orders = Order.objects.all()
-    revenue = orders.exclude(status="cancelled").aggregate(total=Sum("total"))["total"] or Decimal("0")
+    revenue = orders.filter(payment_status="Paid").aggregate(total=Sum("total"))["total"] or Decimal("0")
     context = {
         "products_count": Product.objects.count(),
         "categories_count": Category.objects.count(),
@@ -515,7 +649,7 @@ def owner_dashboard(request):
 
 @owner_required
 def owner_products(request):
-    products = Product.objects.select_related("category").all()
+    products = Product.objects.select_related("category").prefetch_related("variants").all()
     q = request.GET.get("q", "").strip()
     sort = request.GET.get("sort", "newest")
 
@@ -538,6 +672,56 @@ def owner_products(request):
     })
 
 
+ALPHA_SIZES = ["S", "M", "L", "XL", "XXL", "3XL"]
+NUMERIC_SIZES = ["28", "30", "32", "34", "36", "38", "40"]
+
+
+def _process_product_size_variants(product, request):
+    """Processes size variants submitted from owner product form and syncs product total stock & sizes."""
+    selected_sizes = request.POST.getlist("selected_sizes")
+    if selected_sizes:
+        current_variants = {v.size: v for v in product.variants.all()}
+        total_stock = 0
+        active_sizes = []
+
+        # Remove variants that owner unchecked
+        for s_name, var in list(current_variants.items()):
+            if s_name not in selected_sizes:
+                var.delete()
+                del current_variants[s_name]
+
+        # Update or create checked variants
+        for s_name in selected_sizes:
+            s_name = s_name.strip()
+            if not s_name:
+                continue
+            qty_raw = request.POST.get(f"size_qty_{s_name}", "0").strip()
+            try:
+                qty = max(0, int(qty_raw))
+            except (ValueError, TypeError):
+                qty = 0
+
+            if s_name in current_variants:
+                var = current_variants[s_name]
+                var.stock = qty
+                var.save(update_fields=["stock"])
+            else:
+                var = ProductSizeVariant.objects.create(product=product, size=s_name, stock=qty)
+
+            total_stock += qty
+            active_sizes.append(s_name)
+
+        product.stock = total_stock
+        product.sizes = ",".join(active_sizes)
+        product.save(update_fields=["stock", "sizes"])
+    elif request.POST.get("variants_submitted") == "1":
+        # Form was submitted with variants enabled, but owner unchecked all sizes
+        product.variants.all().delete()
+        product.stock = 0
+        product.sizes = ""
+        product.save(update_fields=["stock", "sizes"])
+
+
 @owner_required
 def owner_product_new(request):
     if request.method == "POST":
@@ -553,6 +737,9 @@ def owner_product_new(request):
                     counter += 1
                 product.slug = slug[:50]
                 product.save()
+
+                # Process size variants & sync stock
+                _process_product_size_variants(product, request)
 
                 for f in request.FILES.getlist("gallery_images"):
                     try:
@@ -575,6 +762,9 @@ def owner_product_new(request):
         "form": form,
         "heading": "Add a new product",
         "button": "Save product",
+        "alpha_sizes": ALPHA_SIZES,
+        "numeric_sizes": NUMERIC_SIZES,
+        "variant_map": {},
     })
 
 
@@ -608,6 +798,9 @@ def owner_product_edit(request, product_id):
 
                 product.save()
 
+                # Process size variants & sync stock
+                _process_product_size_variants(product, request)
+
                 # Handle additional gallery photo uploads safely
                 for f in request.FILES.getlist("gallery_images"):
                     try:
@@ -627,11 +820,16 @@ def owner_product_edit(request, product_id):
     else:
         form = ProductForm(instance=product)
 
+    variant_map = {v.size: v.stock for v in product.variants.all()}
+
     return render(request, "owner/product_form.html", {
         "form": form,
         "heading": f"Edit {product.name}",
         "button": "Save changes",
         "product": product,
+        "alpha_sizes": ALPHA_SIZES,
+        "numeric_sizes": NUMERIC_SIZES,
+        "variant_map": variant_map,
     })
 
 
@@ -655,8 +853,14 @@ def owner_product_delete(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == "POST":
         name = product.name
-        product.delete()
-        messages.success(request, f"Product '{name}' was deleted.")
+        try:
+            product.delete()
+            messages.success(request, f"Product '{name}' was deleted.")
+        except ProtectedError:
+            messages.error(
+                request,
+                f"Cannot delete '{name}' because it exists in past customer orders. You can set its stock to 0 or uncheck 'Featured' instead."
+            )
     return redirect("owner_products")
 
 
@@ -866,6 +1070,11 @@ def owner_order_detail(request, order_id):
         if order.status == "cancelled" and not order.stock_restored:
             with transaction.atomic():
                 for item in order.items.select_related("product"):
+                    if item.size:
+                        var = ProductSizeVariant.objects.filter(product=item.product, size=item.size).first()
+                        if var:
+                            var.stock += item.quantity
+                            var.save(update_fields=["stock"])
                     item.product.stock += item.quantity
                     item.product.save(update_fields=["stock"])
                 order.stock_restored = True
@@ -875,6 +1084,11 @@ def owner_order_detail(request, order_id):
             # Re-deduct stock if un-cancelling
             with transaction.atomic():
                 for item in order.items.select_related("product"):
+                    if item.size:
+                        var = ProductSizeVariant.objects.filter(product=item.product, size=item.size).first()
+                        if var:
+                            var.stock = max(0, var.stock - item.quantity)
+                            var.save(update_fields=["stock"])
                     item.product.stock = max(0, item.product.stock - item.quantity)
                     item.product.save(update_fields=["stock"])
                 order.stock_restored = False
@@ -893,14 +1107,19 @@ def owner_order_delete(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == "POST":
         order_num = order.id
-        # Replenish stock if order was never cancelled before deletion
-        if not order.stock_restored:
+        # Replenish stock only if unfulfilled order was not previously cancelled/restored
+        if not order.stock_restored and order.status in ["placed", "confirmed", "packed"]:
             with transaction.atomic():
                 for item in order.items.select_related("product"):
+                    if item.size:
+                        var = ProductSizeVariant.objects.filter(product=item.product, size=item.size).first()
+                        if var:
+                            var.stock += item.quantity
+                            var.save(update_fields=["stock"])
                     item.product.stock += item.quantity
                     item.product.save(update_fields=["stock"])
         order.delete()
-        messages.success(request, f"Order #{order_num} was deleted and product inventory was safely updated.")
+        messages.success(request, f"Order #{order_num} was deleted safely.")
     return redirect("owner_orders")
 
 

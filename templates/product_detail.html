@@ -96,9 +96,38 @@
             </div>
             <p class="text-slate-300 leading-relaxed mt-6 text-sm sm:text-base">{{ product.description }}</p>
 
-            <form action="{% url 'add_to_cart' product.id %}" method="post" class="mt-8">
+            <form action="{% url 'add_to_cart' product.id %}" method="post" class="mt-8" id="addToBagForm">
                 {% csrf_token %}
-                {% if product.size_list %}
+                {% if product.variants.exists %}
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <label class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Select Size</label>
+                        <span id="sizeStockIndicator" class="text-xs text-emerald-400 font-medium">Select size to check availability</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5">
+                        {% for v in product.variants.all %}
+                        {% if v.stock > 0 %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="size" value="{{ v.size }}" data-stock="{{ v.stock }}" class="sr-only peer size-radio" onchange="onSizeSelected(this)">
+                            <span class="inline-flex flex-col items-center justify-center min-w-[3.5rem] h-12 px-3 text-xs font-bold rounded-2xl border border-white/10 bg-[#111622] text-slate-200 shadow-sm transition-all duration-150 select-none hover:border-red-500/50 peer-checked:bg-gradient-to-r peer-checked:from-red-600 peer-checked:to-rose-600 peer-checked:text-white peer-checked:border-red-600 peer-checked:shadow-lg peer-checked:shadow-red-600/30">
+                                <span>{{ v.size }}</span>
+                                {% if v.stock <= 3 %}
+                                <span class="text-[9px] text-amber-300 font-medium leading-none mt-0.5">Only {{ v.stock }} left</span>
+                                {% endif %}
+                            </span>
+                        </label>
+                        {% else %}
+                        <div class="opacity-40 cursor-not-allowed select-none relative group" title="Size {{ v.size }} is sold out">
+                            <span class="inline-flex flex-col items-center justify-center min-w-[3.5rem] h-12 px-3 text-xs font-bold rounded-2xl border border-white/5 bg-[#090d16] text-slate-500 line-through">
+                                <span>{{ v.size }}</span>
+                                <span class="text-[8px] uppercase tracking-wider text-rose-400/80 no-underline leading-none mt-0.5">Sold Out</span>
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif product.size_list %}
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-2.5">
                         <label class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Select Size</label>
@@ -107,7 +136,7 @@
                     <div class="flex flex-wrap gap-2.5">
                         {% for s in product.size_list %}
                         <label class="cursor-pointer">
-                            <input type="radio" name="size" value="{{ s }}" class="sr-only peer" {% if forloop.first %}checked{% endif %}>
+                            <input type="radio" name="size" value="{{ s }}" data-stock="{{ product.stock }}" class="sr-only peer size-radio" {% if forloop.first %}checked{% endif %}>
                             <span class="inline-flex items-center justify-center min-w-[3.25rem] h-11 px-4 text-xs font-bold rounded-2xl border border-white/10 bg-[#111622] text-slate-200 shadow-sm transition-all duration-150 select-none hover:border-red-500/50 peer-checked:bg-gradient-to-r peer-checked:from-red-600 peer-checked:to-rose-600 peer-checked:text-white peer-checked:border-red-600 peer-checked:shadow-lg peer-checked:shadow-red-600/30">
                                 {{ s }}
                             </span>
@@ -116,16 +145,64 @@
                     </div>
                 </div>
                 {% endif %}
-                <div class="flex gap-3">
-                    <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" 
-                           class="w-24 bg-[#111622] text-white border border-white/15 rounded-full px-5 py-3.5 text-center font-bold text-sm outline-none focus:border-red-500 shadow-sm">
+
+                <div class="flex gap-3 items-center">
+                    <div>
+                        <input type="number" id="qtyInput" name="quantity" min="1" max="{{ product.stock }}" value="1" 
+                               class="w-24 bg-[#111622] text-white border border-white/15 rounded-full px-5 py-3.5 text-center font-bold text-sm outline-none focus:border-red-500 shadow-sm transition">
+                    </div>
                     <input type="hidden" name="next" value="cart">
-                    <button class="flex-1 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white rounded-full py-4 font-bold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
-                        <span>Add to Bag</span>
-                        <span class="text-base">🛍️</span>
+                    <button type="submit" id="addToBagBtn" class="flex-1 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full py-4 font-bold text-sm shadow-xl shadow-red-600/35 hover:shadow-red-600/50 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+                        <span id="btnText">Add to Bag</span>
+                        <span class="text-base" id="btnIcon">🛍️</span>
                     </button>
                 </div>
             </form>
+
+            <script>
+                function onSizeSelected(radio) {
+                    const stock = parseInt(radio.dataset.stock || 0);
+                    const qtyInput = document.getElementById('qtyInput');
+                    const indicator = document.getElementById('sizeStockIndicator');
+                    const btn = document.getElementById('addToBagBtn');
+                    const btnText = document.getElementById('btnText');
+
+                    if (qtyInput) {
+                        qtyInput.max = stock;
+                        if (parseInt(qtyInput.value || 1) > stock) {
+                            qtyInput.value = stock;
+                        }
+                    }
+
+                    if (indicator) {
+                        if (stock <= 3) {
+                            indicator.className = 'text-xs text-amber-400 font-semibold';
+                            indicator.textContent = `⚡ Hurry! Only ${stock} left in size ${radio.value}`;
+                        } else {
+                            indicator.className = 'text-xs text-emerald-400 font-medium';
+                            indicator.textContent = `✓ In Stock (${stock} available in size ${radio.value})`;
+                        }
+                    }
+
+                    if (btn && btnText) {
+                        if (stock <= 0) {
+                            btn.disabled = true;
+                            btnText.textContent = "Sold Out";
+                        } else {
+                            btn.disabled = false;
+                            btnText.textContent = "Add to Bag";
+                        }
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const firstAvailable = document.querySelector('.size-radio:not(:disabled)');
+                    if (firstAvailable) {
+                        firstAvailable.checked = true;
+                        onSizeSelected(firstAvailable);
+                    }
+                });
+            </script>
 
             <div class="border-t border-white/10 mt-10 pt-8 grid grid-cols-3 gap-4 text-xs">
                 <div class="bg-[#111622] p-4 rounded-2xl border border-white/10 shadow-sm">
