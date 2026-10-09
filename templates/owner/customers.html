@@ -51,6 +51,10 @@
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30">
             👑 Business Owner
           </span>
+          {% elif c.profile.role == 'staff' %}
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+            🛡️ Staff
+          </span>
           {% else %}
           <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#161c2d] border border-white/10 text-slate-300">
             👤 Customer
@@ -59,16 +63,27 @@
         </td>
         <td class="p-4 text-right whitespace-nowrap">
           {% if c != user %}
-          <form method="post" action="{% url 'owner_customer_toggle_role' c.id %}" class="inline-block">
-            {% csrf_token %}
-            {% if c.profile.role == 'owner' %}
-            <button type="submit" class="text-xs text-amber-400 hover:underline font-semibold">Demote to Customer</button>
-            {% else %}
-            <button type="submit" class="text-xs text-red-400 hover:underline font-semibold">Promote to Owner</button>
-            {% endif %}
-          </form>
+          <div class="flex items-center justify-end gap-2">
+            <!-- Role Selector -->
+            <form method="post" action="{% url 'owner_customer_change_role' c.id %}" class="inline-flex items-center">
+              {% csrf_token %}
+              <select name="role" onchange="this.form.submit()" class="bg-[#161c2d] text-white border border-white/20 rounded-lg px-2.5 py-1 text-xs focus:border-red-500 cursor-pointer">
+                <option value="customer" {% if c.profile.role == 'customer' %}selected{% endif %}>Customer</option>
+                <option value="staff" {% if c.profile.role == 'staff' %}selected{% endif %}>Staff</option>
+                <option value="owner" {% if c.profile.role == 'owner' or c.is_superuser %}selected{% endif %}>Owner</option>
+              </select>
+            </form>
+
+            <!-- Delete User Button -->
+            <form method="post" action="{% url 'owner_user_delete' c.id %}" onsubmit="return confirm('Permanently delete user {{ c.username }}?');" class="inline-block">
+              {% csrf_token %}
+              <button type="submit" class="px-2.5 py-1 text-xs text-red-400 hover:text-white hover:bg-red-500/30 border border-red-500/30 rounded-lg transition" title="Delete Account">
+                🗑️ Delete
+              </button>
+            </form>
+          </div>
           {% else %}
-          <span class="text-xs text-slate-500 italic">Protected</span>
+          <span class="text-xs text-slate-500 italic">Protected (You)</span>
           {% endif %}
         </td>
       </tr>

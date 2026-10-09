@@ -38,7 +38,8 @@ urlpatterns = [
     path("owner/categories/<int:category_id>/delete/", views.owner_category_delete, name="owner_category_delete"),
 
     path("owner/customers/", views.owner_customers, name="owner_customers"),
-    path("owner/customers/<int:user_id>/toggle-role/", views.owner_customer_toggle_role, name="owner_customer_toggle_role"),
+    path("owner/customers/<int:user_id>/change-role/", views.owner_customer_change_role, name="owner_customer_change_role"),
+    path("owner/customers/<int:user_id>/delete/", views.owner_user_delete, name="owner_user_delete"),
 
     path("owner/orders/", views.owner_orders, name="owner_orders"),
     path("owner/orders/<int:order_id>/", views.owner_order_detail, name="owner_order_detail"),

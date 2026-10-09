@@ -8,6 +8,7 @@ class Profile(models.Model):
     ROLE_CHOICES = (
         ("customer", "Customer"),
         ("owner", "Business Owner"),
+        ("staff","Staff"),
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="customer")
@@ -20,6 +21,16 @@ class Profile(models.Model):
             if not self.user.is_staff or not self.user.is_superuser:
                 self.user.is_staff = True
                 self.user.is_superuser = True
+                self.user.save(update_fields=["is_staff", "is_superuser"])
+        elif self.role == "staff":
+            if not self.user.is_staff or self.user.is_superuser:
+                self.user.is_staff = True
+                self.user.is_superuser = False
+                self.user.save(update_fields=["is_staff", "is_superuser"])
+        elif self.role == "customer":
+            if self.user.is_staff or self.user.is_superuser:
+                self.user.is_staff = False
+                self.user.is_superuser = False
                 self.user.save(update_fields=["is_staff", "is_superuser"])
         super().save(*args, **kwargs)
 
@@ -198,7 +209,7 @@ class Order(models.Model):
             ("cancelled", "Cancelled"),
         )
 
-        user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+        user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders")
         full_name = models.CharField(max_length=120)
         phone = models.CharField(max_length=20)
         address = models.TextField()

@@ -57,12 +57,19 @@
 
             <div>
                 <label class="text-xs uppercase tracking-widest text-slate-300 font-semibold">Payment Status</label>
+                {% if is_owner %}
                 <select name="payment_status" class="w-full border border-white/15 rounded-xl p-3 mt-1 text-sm bg-[#161c2d] text-white focus:border-red-500">
                     <option value="Pending" {% if order.payment_status == "Pending" %}selected{% endif %}>Pending</option>
                     <option value="Submitted / Under Verification" {% if order.payment_status == "Submitted / Under Verification" %}selected{% endif %}>Submitted / Under Verification</option>
                     <option value="Paid" {% if order.payment_status == "Paid" %}selected{% endif %}>Paid</option>
                     <option value="Failed" {% if order.payment_status == "Failed" %}selected{% endif %}>Failed</option>
                 </select>
+                {% else %}
+                <div class="mt-1 p-3 rounded-xl bg-[#161c2d] border border-white/10 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-white">{{ order.payment_status }}</span>
+                    <span class="text-[11px] text-amber-400 font-medium">🔒 Owner verification required</span>
+                </div>
+                {% endif %}
             </div>
 
             <div class="border-t border-white/10 pt-4 space-y-3">
@@ -97,12 +104,14 @@
             </div>
             {% endif %}
 
+            {% if is_owner %}
             <form method="post" action="{% url 'owner_order_delete' order.id %}" onsubmit="return confirm('Are you sure you want to delete Order #{{ order.id }}? This cannot be undone.');">
                 {% csrf_token %}
                 <button type="submit" class="w-full text-center text-red-400 hover:text-red-300 text-xs py-2 hover:underline font-semibold">
                     🗑️ Delete This Order
                 </button>
             </form>
+            {% endif %}
             <div class="text-xs text-slate-500 text-center">
                 <b>Google Pay / UPI:</b> Verify the payment with UTR reference before dispatching.
             </div>

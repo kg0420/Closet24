@@ -24,11 +24,18 @@ from .models import Category, Order, OrderItem, Product, Profile, ShopSettings, 
 def is_owner_or_staff(user):
     if not user.is_authenticated:
         return False
-    if user.is_staff or user.is_superuser:
+    if  user.is_superuser:
+        return True
+    profile = Profile.objects.filter(user=user).first()
+    return profile is not None and profile.role in ["owner", "staff"]
+
+def is_owner(user):
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
         return True
     profile = Profile.objects.filter(user=user).first()
     return profile is not None and profile.role == "owner"
-
 
 def home(request):
     featured = Product.objects.filter(featured=True, stock__gt=0)[:8]
@@ -620,18 +627,27 @@ def download_receipt(request, order_id):
 
 
 # ------------------- OWNER / ADMIN SECTION (STRICTLY HIDDEN) -------------------
+def store_admin_required(view_func):
+    """Allows staff and owner"""
+    def _wrapped_view(request,*arg,**kwargs):
+        if not is_owner_or_staff(request.user):
+            messages.error(request,"Access restricted. Only store staff and owners can access this page.")
+            return redirect("home")
+        return view_func(request,*arg,**kwargs)
+    return login_required(_wrapped_view)
+
 
 def owner_required(view_func):
-    """Decorator ensuring only owner or staff can access."""
+    """Decorator ensuring only owner can access."""
     def _wrapped_view(request, *args, **kwargs):
-        if not is_owner_or_staff(request.user):
-            messages.error(request, "Access restricted. Only store administrators can access this page.")
-            return redirect("home")
+        if not is_owner(request.user):
+            messages.error(request, "Access restricted. Only the Business Owner has permission to access this page.")
+            return redirect("owner_dashboard")
         return view_func(request, *args, **kwargs)
     return login_required(_wrapped_view)
 
 
-@owner_required
+@store_admin_required
 def owner_dashboard(request):
     orders = Order.objects.all()
     revenue = orders.filter(payment_status="Paid").aggregate(total=Sum("total"))["total"] or Decimal("0")
@@ -647,7 +663,7 @@ def owner_dashboard(request):
     return render(request, "owner/dashboard.html", context)
 
 
-@owner_required
+@store_admin_required
 def owner_products(request):
     products = Product.objects.select_related("category").prefetch_related("variants").all()
     q = request.GET.get("q", "").strip()
@@ -722,7 +738,7 @@ def _process_product_size_variants(product, request):
         product.save(update_fields=["stock", "sizes"])
 
 
-@owner_required
+@store_admin_required
 def owner_product_new(request):
     if request.method == "POST":
         try:
@@ -768,7 +784,7 @@ def owner_product_new(request):
     })
 
 
-@owner_required
+@store_admin_required
 def owner_product_edit(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == "POST":
@@ -833,7 +849,7 @@ def owner_product_edit(request, product_id):
     })
 
 
-@owner_required
+@store_admin_required
 def owner_product_delete_gallery_image(request, image_id):
     img = get_object_or_404(ProductImage, id=image_id)
     product_id = img.product_id
@@ -848,7 +864,7 @@ def owner_product_delete_gallery_image(request, image_id):
     return redirect("owner_product_edit", product_id=product_id)
 
 
-@owner_required
+@store_admin_required
 def owner_product_delete(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == "POST":
@@ -924,31 +940,56 @@ def owner_customers(request):
 
 
 @owner_required
-def owner_customer_toggle_role(request, user_id):
+def owner_customer_change_role(request, user_id):
     target_user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
         if target_user == request.user:
             messages.error(request, "You cannot modify your own role.")
             return redirect("owner_customers")
+
+        new_role = request.POST.get("role", "").strip().lower()
+        if new_role not in ["customer", "staff", "owner"]:
+            messages.error(request, "Invalid role selected.")
+            return redirect("owner_customers")
+
         profile, _ = Profile.objects.get_or_create(user=target_user)
-        if profile.role == "owner":
-            profile.role = "customer"
-            target_user.is_staff = False
-            target_user.is_superuser = False
-            target_user.save(update_fields=["is_staff", "is_superuser"])
-            profile.save()
-            messages.success(request, f"User '{target_user.username}' is now a Customer.")
-        else:
-            profile.role = "owner"
+        profile.role = new_role
+        profile.save()
+
+        if new_role == "owner":
             target_user.is_staff = True
             target_user.is_superuser = True
             target_user.save(update_fields=["is_staff", "is_superuser"])
-            profile.save()
-            messages.success(request, f"User '{target_user.username}' is now a Business Owner with full admin access.")
+            messages.success(request, f"User '{target_user.username}' has been promoted to Business Owner.")
+        elif new_role == "staff":
+            target_user.is_staff = True
+            target_user.is_superuser = False
+            target_user.save(update_fields=["is_staff", "is_superuser"])
+            messages.success(request, f"User '{target_user.username}' is now assigned as Staff.")
+        elif new_role == "customer":
+            target_user.is_staff = False
+            target_user.is_superuser = False
+            target_user.save(update_fields=["is_staff", "is_superuser"])
+            messages.info(request, f"User '{target_user.username}' is now set as Customer.")
+
     return redirect("owner_customers")
 
 
 @owner_required
+def owner_user_delete(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    if request.method == "POST":
+        if target_user == request.user:
+            messages.error(request, "You cannot delete your own account.")
+            return redirect("owner_customers")
+
+        username = target_user.username
+        target_user.delete()
+        messages.success(request, f"Account '{username}' was permanently deleted.")
+
+    return redirect("owner_customers")
+
+@store_admin_required 
 def owner_orders(request):
     orders = Order.objects.all().select_related("user")
 
@@ -1046,7 +1087,7 @@ def owner_orders(request):
     })
 
 
-@owner_required
+@store_admin_required 
 def owner_order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == "POST":
@@ -1059,8 +1100,13 @@ def owner_order_detail(request, order_id):
         old_status = order.status
         if status in dict(Order.STATUS_CHOICES):
             order.status = status
-        if payment_status:
-            order.payment_status = payment_status
+
+        # Payment status can ONLY be modified by the Business Owner
+        if is_owner(request.user):
+            if payment_status:
+                order.payment_status = payment_status
+        elif payment_status and payment_status != order.payment_status:
+            messages.warning(request, "Permission denied: Staff members cannot modify payment verification status.")
 
         order.courier_partner = courier_partner
         order.tracking_number = tracking_number
