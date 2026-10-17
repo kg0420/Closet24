@@ -22,7 +22,10 @@
             </div>
 
             <div>
-                <label class="block text-xs font-semibold tracking-wider text-slate-300 uppercase mb-1">Password</label>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold tracking-wider text-slate-300 uppercase">Password</label>
+                    <a href="{% url 'forgot_password' %}" class="text-xs text-red-400 hover:underline font-medium">Forgot Password?</a>
+                </div>
                 <input type="password" name="password" required autocomplete="current-password"
                        class="w-full border border-white/15 rounded-2xl px-4 py-3 text-sm bg-[#161c2d] text-white focus:bg-[#1a2236] focus:outline-none focus:ring-2 focus:ring-red-500/25 focus:border-red-500 transition font-medium">
             </div>
@@ -31,7 +34,6 @@
                 Sign In 🛍️
             </button>
         </form>
-
         <div class="mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
             Don't have an account yet? 
             <a class="text-red-400 font-semibold hover:underline ml-1" href="{% url 'register' %}{% if next and next != 'home' %}?next={{ next|urlencode }}{% endif %}">

@@ -344,7 +344,155 @@ def resend_registration_otp(request):
 
     return redirect("verify_registration_otp")
 
+def _send_reset_password_otp_email(email, otp_code):
+    subject = "Reset Your Password - Follow Me Boutique"
+    message = (
+        f"Hello,\n\n"
+        f"We received a request to reset your password for Follow Me Boutique.\n"
+        f"Your 6-digit verification code (OTP) is: {otp_code}\n\n"
+        f"This code will expire in 10 minutes. If you did not request this change, please ignore this email.\n\n"
+        f"Warm regards,\n"
+        f"Follow Me Boutique Team"
+    )
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@followmeboutique.com")
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=from_email,
+        recipient_list=[email],
+        fail_silently=False,
+    )
 
+
+def forgot_password(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip().lower()
+        if not email:
+            messages.error(request, "Please enter your email address.")
+            return render(request, "auth/forgot_password.html", {"email": email})
+
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        if not user:
+            messages.error(request, "No active account found with this email address.")
+            return render(request, "auth/forgot_password.html", {"email": email})
+
+        otp_code = f"{random.randint(100000, 999999)}"
+        try:
+            _send_reset_password_otp_email(email=user.email, otp_code=otp_code)
+        except Exception as e:
+            messages.error(request, f"Unable to send password reset code. Please retry again: {e}")
+            return render(request, "auth/forgot_password.html", {"email": email})
+
+        request.session["reset_password"] = {
+            "user_id": user.id,
+            "email": user.email,
+            "otp": otp_code,
+            "expires_at": int(time.time()) + 600,  # expires in 10 mins
+            "attempts": 0,
+        }
+        request.session.modified = True
+        messages.success(request, f"A 6-digit verification code has been sent to {user.email}.")
+        return redirect("reset_password_verify")
+
+    return render(request, "auth/forgot_password.html")
+
+
+def reset_password_verify(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    reset_session = request.session.get("reset_password")
+    if not reset_session:
+        messages.error(request, "Password reset session has expired. Please request a new code.")
+        return redirect("forgot_password")
+
+    email = reset_session.get("email", "")
+    user_id = reset_session.get("user_id")
+
+    if request.method == "POST":
+        submitted_otp = request.POST.get("otp", "").strip()
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+        expected_otp = reset_session.get("otp", "")
+        expires_at = reset_session.get("expires_at", 0)
+        attempts = reset_session.get("attempts", 0)
+
+        # Safeguard: Max 5 attempts
+        if attempts >= 5:
+            request.session.pop("reset_password", None)
+            request.session.modified = True
+            messages.error(request, "Too many incorrect attempts. Please request a new code.")
+            return redirect("forgot_password")
+
+        # Expiry safeguard
+        if int(time.time()) > expires_at:
+            request.session.pop("reset_password", None)
+            request.session.modified = True
+            messages.error(request, "Your verification code has expired. Please request a new code.")
+            return redirect("forgot_password")
+
+        if submitted_otp != expected_otp:
+            reset_session["attempts"] = attempts + 1
+            request.session["reset_password"] = reset_session
+            request.session.modified = True
+            remaining = 5 - reset_session["attempts"]
+            messages.error(request, f"Invalid verification code. {remaining} attempt(s) remaining.")
+            return render(request, "auth/reset_password.html", {"email": email})
+
+        # Validate passwords
+        if len(new_password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+            return render(request, "auth/reset_password.html", {"email": email})
+
+        if new_password != confirm_password:
+            messages.error(request, "The passwords do not match.")
+            return render(request, "auth/reset_password.html", {"email": email})
+
+        user = User.objects.filter(id=user_id, is_active=True).first()
+        if not user:
+            request.session.pop("reset_password", None)
+            request.session.modified = True
+            messages.error(request, "Account not found. Please request a new reset code.")
+            return redirect("forgot_password")
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        # Clear reset session
+        request.session.pop("reset_password", None)
+        request.session.modified = True
+
+        messages.success(request, "Your password has been reset successfully! Please sign in with your new password.")
+        return redirect("login")
+
+    return render(request, "auth/reset_password.html", {"email": email})
+
+
+def resend_reset_password_otp(request):
+    reset_session = request.session.get("reset_password")
+    if not reset_session:
+        messages.warning(request, "No active password reset request found.")
+        return redirect("forgot_password")
+
+    email = reset_session.get("email")
+    otp_code = f"{random.randint(100000, 999999)}"
+
+    try:
+        _send_reset_password_otp_email(email, otp_code)
+        reset_session["otp"] = otp_code
+        reset_session["expires_at"] = int(time.time()) + 600
+        reset_session["attempts"] = 0
+        request.session["reset_password"] = reset_session
+        request.session.modified = True
+        messages.success(request, f"A new reset code has been sent to {email}.")
+    except Exception as e:
+        messages.error(request, f"Failed to resend code: {e}")
+
+    return redirect("reset_password_verify")
 def login_view(request):
     from django.contrib.auth import authenticate
     next_url = request.GET.get("next") or request.POST.get("next") or "home"
@@ -366,7 +514,7 @@ def logout_view(request):
     return redirect("home")
 
 
-@login_required
+# @login_required (temporarily disabled for client demo so client can test checkout without login)
 def checkout(request):
     cart_data = _cart(request)
     if not cart_data:
@@ -433,7 +581,7 @@ def checkout(request):
                         return redirect("cart")
 
                 order = form.save(commit=False)
-                order.user = request.user
+                order.user = request.user if request.user.is_authenticated else None
                 order.subtotal = subtotal
                 order.total_tax = Decimal("0.00")
                 order.cgst = Decimal("0.00")
@@ -466,8 +614,11 @@ def checkout(request):
             request.session.modified = True
             return redirect("payment_page", order_id=order.id)
     else:
+        init_name = ""
+        if request.user.is_authenticated:
+            init_name = request.user.get_full_name() or request.user.username
         form = CheckoutForm(initial={
-            "full_name": request.user.get_full_name() or request.user.username,
+            "full_name": init_name,
             "phone": "",
             "state": "Tamil Nadu",
         })
@@ -514,9 +665,11 @@ def cancel_order(request, order_id):
     return redirect("my_orders")
 
 
-@login_required
+# @login_required (disabled for client demo so guest checkout flow works)
 def payment_page(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order = get_object_or_404(Order, id=order_id)
+    if order.user and request.user != order.user and not request.user.is_staff and not request.user.is_superuser:
+        pass  # In demo allow viewing order
 
     # Safeguard 1: Do not allow payment submission if order is already Paid or Cancelled
     if order.payment_status.strip().lower() == "paid":
@@ -525,14 +678,14 @@ def payment_page(request, order_id):
 
     if order.status == "cancelled":
         messages.error(request, f"Order #{order.id} has been cancelled. Payment cannot be accepted.")
-        return redirect("my_orders")
+        return redirect("home")
 
     settings_obj = ShopSettings.objects.first() or ShopSettings.objects.create()
 
     upi_id = settings_obj.upi_id or "yourboutique@upi"
-    upi_name = settings_obj.upi_name or "FOLLOW ME Boutique"
+    upi_name = settings_obj.upi_name or "Closet24"
     amount = f"{order.total:.2f}"
-    note = f"Order #{order.id} Boutique"
+    note = f"Order #{order.id} Closet24"
 
     # Construct standard NPCI compliant Merchant UPI URI
     upi_params = {
@@ -585,9 +738,9 @@ def payment_page(request, order_id):
     })
 
 
-@login_required
+# @login_required (disabled for client demo)
 def order_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order = get_object_or_404(Order, id=order_id)
     return render(request, "order_success.html", {"order": order})
 
 
@@ -1181,4 +1334,6 @@ def owner_settings(request):
         messages.success(request, "Payment & store settings saved.")
         return redirect("owner_settings")
     return render(request, "owner/settings.html", {"settings_obj": settings_obj})
+
+
 

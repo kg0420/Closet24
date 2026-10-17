@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Follow Me Boutique — Premium Men's Fashion{% endblock %}</title>
+    <title>{% block title %}{{ shop_settings.shop_name|default:"Closet24" }} — Premium Men's Fashion{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -94,8 +94,8 @@
             <!-- Boutique Logo -->
             <a href="{% url 'home' %}" class="group flex items-center gap-2">
                 <span class="display text-xl lg:text-3xl font-bold tracking-tight text-white transition group-hover:opacity-90">
-                    Follow Me Boutique<span class="text-red-500 inline-block transition-transform duration-300 group-hover:scale-125">.</span>
-                </span class="">
+                    Closet24<span class="text-red-500 inline-block transition-transform duration-300 group-hover:scale-125">.</span>
+                </span>
                 <span class="hidden sm:inline-block text-[10px] uppercase font-bold tracking-[.2em] bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-0.5 rounded-full ">
                     Men's Boutique ✨
                 </span>
@@ -129,9 +129,8 @@
                         Logout
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="text-xs uppercase tracking-widest font-bold text-slate-200 hover:text-red-400 transition px-2">
-                        Sign In
-                    </a>
+                    {# Login and registration temporarily commented out for client demo #}
+                    {# <a href="{% url 'login' %}" class="text-xs uppercase tracking-widest font-bold text-slate-200 hover:text-red-400 transition px-2">Sign In</a> #}
                 {% endif %}
 
                 <!-- Animated Shopping Bag -->
@@ -182,7 +181,7 @@
         <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 lg:py-5 grid md:grid-cols-4 gap-5">
             <div class="md:col-span-2 space-y-4">
                 <div class="display text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                    Follow Me Boutique<span class="text-red-500">.</span>
+                    Closet24<span class="text-red-500">.</span>
                 </div>
                 <!-- <p class="text-slate-400 max-w-md leading-relaxed text-sm">
                     Curated exclusively for adult men. Premium collections of designer denim jeans, casual & formal shirts, modern baggy fits, and tailored menswear essentials.
@@ -208,11 +207,8 @@
             <div>
                 <p class="uppercase tracking-[.25em] text-xs font-bold text-red-400 mb-4">Boutique Desk</p>
                 <div class="grid gap-2.5 text-sm text-slate-400">
-                    <a href="https://www.instagram.com/follow_me_boutique.55/" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
-                        <span>📸</span> Instagram @follow_me
-                    </a>
-                    <a href="https://wa.me/7387990992" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
-                        <span>💬</span> WhatsApp
+                    <a href="https://wa.me/7219570360" target="_blank" class="hover:text-red-400 transition flex items-center gap-2">
+                        <span>💬</span> WhatsApp Support
                     </a>
                     <!-- <span class="text-xs text-slate-500 pt-1">🕒 Store Hours: Mon–Sat · 10 AM–8 PM</span>
                     <span class="text-xs text-slate-500">📍 Free Local Store Pickup Available</span> -->
@@ -224,7 +220,7 @@
         <div class="border-t border-white/10 bg-black/60 py-6 px-5">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
                 <div>
-                    © 2026 Follow Me Boutique. All rights reserved.
+                    © 2026 Closet24. All rights reserved.
                 </div>
                 <div class="flex items-center gap-2 font-medium bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/30 text-slate-300 hover:border-red-500 transition">
                     <span>✨</span>
@@ -233,6 +229,7 @@
                      Krish Gupta</span></a>
                     <span>🚀</span>
                 </div>
+                
             </div>
         </div>
     </footer>
